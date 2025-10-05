@@ -30,67 +30,168 @@
   </head>
 
   <body class="bg-gray-50 min-h-screen">
-    <header class="bg-white shadow-xs">
-      <div
-        class="max-w-7xl mx-auto flex items-center justify-between py-4 px-6"
-      >
-        <img
-          src="f8ffc33b1325031bdf8781ce5b5d6ee0aeddb0ea.png"
-          alt="VRTO Logo"
-          class="h-8 mr-4"
-        />
-        <nav class="hidden md:flex space-x-8 text-sm font-medium text-gray-700">
-          <a href="#" class="text-blue-500">Home</a>
-          <a href="#">App Features</a>
-          <a href="#">Training</a>
-          <a href="#">Nutrition</a>
-          <a href="#">Testimonials</a>
-          <a href="#">About</a>
-        </nav>
-      </div>
-    </header>
-    <main>
-      <section
-        class="relative w-full min-h-[520px] md:min-h-[600px] flex items-center justify-start px-6 pt-16 pb-8 md:pb-0 overflow-hidden"
-        style="background: #f7f7f7"
-      >
-        <!-- گرادینت سفید فقط زیر متن‌ها -->
-        <div
-          class="absolute left-0 top-0 h-full w-2/3 md:w-1/2 bg-linear-to-r from-white via-white/90 to-transparent z-0"
-        ></div>
-        <!-- عکس افراد با z-10 -->
-        <img
-          src="photo_5972253300873087910_w.jpg"
-          alt="Hero People"
-          class="absolute right-0 bottom-0 h-full md:h-[95%] w-auto max-w-none object-contain z-10 select-none pointer-events-none"
-          style="min-width: 500px; max-width: none"
-        />
-        <!-- متن‌ها با z-20 -->
-        <div
-          class="relative z-20 max-w-2xl flex flex-col items-start space-y-6 ml-0 md:ml-12 lg:ml-20"
-        >
-          <div class="text-lg md:text-xl font-bold text-black tracking-wide">
-            TRUSTED BY <span class="text-sky-500">+250,000</span> PEOPLE
-            WORLDWIDE.
-          </div>
-        <h1 class="text-3xl md:text-5xl font-extrabold leading-tight">
-    <span
-      class="bg-linear-to-r from-[#A3DDF8] via-[#00A3E0] to-[#FF2E92] bg-clip-text text-transparent"
-    >READY FOR YOUR STRONGEST,<br class="hidden md:block" />
-      MOST CONFIDENT SELF?</span
+   <!-- DESKTOP HEADER: دقیقاً همونی که می‌خوای — بدون تغییر -->
+<header class="desktop-header bg-white shadow-xs hidden md:block">
+  <div class="max-w-7xl mx-auto flex items-center justify-between py-4 px-6">
+    <img
+  src="f8ffc33b1325031bdf8781ce5b5d6ee0aeddb0ea.png"
+  alt="VRTO Logo"
+  class="h-4 sm:h-6 md:h-10 lg:h-5 w-auto mr-2 sm:mr-4 object-contain -mx-15"
+/>
+    <nav class="hidden md:flex space-x-8 text-sm font-medium text-gray-700 -mx-15">
+      <a href="#" class="text-blue-500">Home</a>
+      <a href="#">App Features</a>
+      <a href="#">Training</a>
+      <a href="#">Nutrition</a>
+      <a href="#">Testimonials</a>
+      <a href="#">About</a>
+    </nav>
+  </div>
+</header>
+
+<!-- MOBILE HEADER: کاملاً جدا و فقط برای < md -->
+<header class="mobile-header md:hidden bg-white shadow-xs">
+  <div class="max-w-7xl mx-auto flex items-center justify-between py-3 px-4">
+    <!-- می‌تونی اندازه لوگو/فضا یا چیزای دیگه رو فقط برای موبایل اینجا تغییر بدی -->
+    <img
+      src="f8ffc33b1325031bdf8781ce5b5d6ee0aeddb0ea.png"
+      alt="VRTO Logo"
+      class="h-5 w-auto object-contain"
+    />
+
+    <!-- Hamburger (only mobile) -->
+    <button
+      id="mobile-toggle"
+      aria-expanded="false"
+      aria-controls="mobile-panel"
+      class="p-2 rounded-md focus:outline-none"
+      title="Open menu"
     >
-</h1>
-          <p class="text-gray-700 text-lg md:text-xl max-w-md">
-            Get a plan built for your body, your goals. Take our quiz to start
-            now.
-          </p>
-          <button
-            class="mt-4 px-8 py-3 bg-pink-500 hover:bg-pink-600 text-white font-bold rounded-lg shadow-lg transition text-base md:text-lg"
-          >
-            TAKE THE QUIZ
-          </button>
-        </div>
-      </section>
+      <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- mobile panel (hidden by default) -->
+  <div id="mobile-panel" class="hidden border-t border-gray-100">
+    <div class="px-6 pb-4 pt-3 flex flex-col space-y-2 text-sm font-medium text-gray-700 bg-white">
+      <!-- ترتیب/متن/استایل این لینک‌ها برای موبایل دلخواه قابل تغییر است -->
+      <a href="#" class="block py-2 rounded hover:bg-gray-50 text-blue-500">Home</a>
+      <a href="#" class="block py-2 rounded hover:bg-gray-50">App Features</a>
+      <a href="#" class="block py-2 rounded hover:bg-gray-50">Training</a>
+      <a href="#" class="block py-2 rounded hover:bg-gray-50">Nutrition</a>
+      <a href="#" class="block py-2 rounded hover:bg-gray-50">Testimonials</a>
+      <a href="#" class="block py-2 rounded hover:bg-gray-50">About</a>
+    </div>
+  </div>
+</header>
+
+<script>
+  (function () {
+    const mm = window.matchMedia('(max-width: 767px)'); // md breakpoint = 768px
+    let initialized = false;
+
+    function initMobileMenu() {
+      if (!mm.matches) return; 
+      if (initialized) return;
+      initialized = true;
+
+      const btn = document.getElementById('mobile-toggle');
+      const panel = document.getElementById('mobile-panel');
+      if (!btn || !panel) return;
+
+      btn.addEventListener('click', () => {
+        const open = panel.classList.toggle('hidden') === false;
+        btn.setAttribute('aria-expanded', String(open));
+      });
+
+      panel.querySelectorAll('a').forEach(a => {
+        a.addEventListener('click', () => {
+          panel.classList.add('hidden');
+          btn.setAttribute('aria-expanded', 'false');
+        });
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          panel.classList.add('hidden');
+          btn.setAttribute('aria-expanded', 'false');
+        }
+      });
+    }
+
+    function destroyMobileMenu() {
+      initialized = false;
+      const panel = document.getElementById('mobile-panel');
+      const btn = document.getElementById('mobile-toggle');
+      if (panel) panel.classList.add('hidden');
+      if (btn) btn.setAttribute('aria-expanded', 'false');
+    }
+
+    function handleChange() {
+      if (mm.matches) initMobileMenu();
+      else destroyMobileMenu();
+    }
+
+    // شروع
+    handleChange();
+    mm.addListener(handleChange); 
+  })();
+</script>
+
+    <main>
+<section
+  class="relative w-full min-h-[520px] md:min-h-[600px] flex items-center justify-start px-6 pt-16 pb-8 md:pb-0 overflow-hidden"
+  style="background: #f7f7f7"
+>
+  <!-- گرادینت سفید فقط زیر متن‌ها -->
+  <div
+    class="absolute left-0 top-0 h-full w-2/3 md:w-1/2 bg-linear-to-r from-white via-white/90 to-transparent z-0"
+  ></div>
+
+  <!-- عکس افراد با z-10 -->
+  <!-- فقط اینجا یک کلاس اضافه شد: hero-img -->
+  <img
+    src="photo_5972253300873087910_w.jpg"
+    alt="Hero People"
+    class="absolute right-0 bottom-0 h-full md:h-[95%] w-auto max-w-none object-contain z-10 select-none pointer-events-none hero-img"
+    style="min-width: 500px; max-width: none"
+  />
+
+  <!-- متن‌ها با z-20 -->
+  <div class="relative z-20 max-w-2xl flex flex-col items-start space-y-6 ml-0 md:ml-12 lg:ml-20">
+    <div class="text-lg md:text-xl font-bold text-black tracking-wide">
+      TRUSTED BY <span class="text-sky-500">+250,000</span> PEOPLE WORLDWIDE.
+    </div>
+    <h1 class="text-3xl md:text-5xl font-extrabold leading-tight">
+      <span class="bg-linear-to-r from-[#A3DDF8] via-[#00A3E0] to-[#FF2E92] bg-clip-text text-transparent">
+        READY FOR YOUR STRONGEST,<br class="hidden md:block" />
+        MOST CONFIDENT SELF?
+      </span>
+    </h1>
+    <p class="text-gray-700 text-lg md:text-xl max-w-md">
+      Get a plan built for your body, your goals. Take our quiz to start now.
+    </p>
+    <button
+      class="mt-4 px-8 py-3 bg-pink-500 hover:bg-pink-600 text-white font-bold rounded-lg shadow-lg transition text-base md:text-lg"
+    >
+      TAKE THE QUIZ
+    </button>
+  </div>
+</section>
+
+
+<style>
+  /* فقط برای موبایل: وسط‌چین کردن محتوای تصویر (بدون تغییر اندازه) */
+  @media (max-width: 767px) {
+    .hero-img {
+      /* object-position فقط محتوا را داخل باکس تصویر وسط می‌کند */
+      object-position: 150px
+      /* object-fit در کلاس موجود است (object-contain)، پس object-position تأثیر خواهد داشت */
+    }
+  }
+</style>
 
       <!-- EXACT FEATURE SECTION 1 -->
       <section class="relative overflow-hidden">
@@ -175,13 +276,14 @@
           class="max-w-7xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-12 items-center"
         >
           <!-- Left: provided composite image -->
-          <div class="relative h-[600px] md:h-[660px]">
-            <img
-              src="ko-3.png"
-              alt="Plateau phones"
-              class="absolute left-1 md:left-6 bottom-0 h-full w-auto object-contain select-none pointer-events-none"
-            />
-          </div>
+      <div class="relative h-[600px] md:h-[660px]">
+  <img
+    src="ko-3.png"
+    alt="Plateau phones"
+    class="absolute left-0 md:-left-6 bottom-0 h-full w-auto object-contain select-none pointer-events-none"
+  />
+</div>
+
           <!-- Right: content -->
           <div>
             <h2
@@ -310,7 +412,7 @@
             class="md:col-span-3 lg:col-span-3 relative min-h-[420px] md:min-h-[520px] flex items-start justify-start ml-0 md:-ml-32 lg:-ml-20 z-40"
           >
             <img
-              src="med.png"
+              src="photo_5985493027189281098_w-removebg-preview.png"
               alt="Programs phones"
               class="relative z-40 w-full h-auto md:max-w-[640px] lg:max-w-[780px] object-contain select-none pointer-events-none md:-translate-x-12 lg:-translate-x-0"
             />
@@ -409,7 +511,7 @@
   </section>
     </main>
     <section class="relative pb-16 px-4 sm:px-6 lg:px-8 bg-white">
-    <div class="max-w-7xl mx-auto"> 
+    <div class="max-w-7xl mx-auto "> 
         <div 
             class="relative overflow-hidden rounded-2xl shadow-2xl p-6 md:p-12 lg:p-16 flex flex-col items-start justify-center text-center md:text-left h-[500px]" 
         >
