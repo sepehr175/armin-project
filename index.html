@@ -26,6 +26,172 @@
         font-family: "R-Flex", sans-serif;
         letter-spacing: 0;
       }
+        @media (min-width: 768px) and (max-width: 900px) {
+    /* Logo / nav */
+    .desktop-header img,
+    .mobile-header img {
+      height: 14px !important;
+      margin-left: -26px;
+    }
+    .desktop-header nav {
+      gap: 1.75rem !important;
+      font-size: 15px !important;
+      width: 100%;
+    }
+
+    /* Hero: reduce height & paddings so hero fits on tablet */
+    section[style*="background: #f7f7f7"] {
+      min-height: 520px !important;
+      padding-top: 3rem !important;
+      padding-bottom: 1.5rem !important;
+    }
+
+    /* Hero image: make less wide so it doesn't overflow */
+    .hero-img {
+      min-width: 360px !important;
+      right: -6px !important;
+      max-width: none !important;
+      height: auto !important;
+      max-height: 88% !important;
+    }
+
+    /* Headline: slightly smaller on tablet */
+    section[style*="background: #f7f7f7"] h1 {
+      font-size: 2.1rem !important;
+      line-height: 1.08 !important;
+    }
+    section[style*="background: #f7f7f7"] h1 .text-4xl {
+      font-size: 2.2rem !important;
+    }
+
+    /* Program cards: change fixed 384px cards to fluid but constrained */
+    [class*="rounded-[16px]"] {
+      width: calc(100% - 2rem) !important;
+      max-width: 340px !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+    }
+    [class*="w-[384px]"] {
+      width: 100% !important;
+      max-width: 340px !important;
+    }
+
+    /* Right-side program image: reduce overlap/size */
+    img[alt*="Programs phones"] {
+      max-width: 480px !important;
+      transform: translateX(-6px) !important;
+    }
+
+    /* Nutrition phones image: prevent clipping and huge transforms */
+    img[alt*="Nutrition phones"] {
+      width: 480px !important;
+      max-width: 88% !important;
+      transform: none !important;
+      position: relative !important;
+      top: 0 !important;
+      left: 0 !important;
+    }
+
+    /* Resize hero people image to avoid pushing content off-screen */
+    img[alt*="Hero People"] {
+      height: auto !important;
+      max-height: 92% !important;
+      min-width: 340px !important;
+    }
+
+    /* Card inner images: slightly shorter for tablet */
+    img[alt*="Banded lower body"],
+    img[alt*="Tone & sculpt upper"],
+    img[alt*="Full body power"] {
+      height: 200px !important;
+      object-fit: cover !important;
+    }
+
+    /* Buttons: tighter padding for tablet */
+    button {
+      padding-left: 1rem !important;
+      padding-right: 1rem !important;
+    }
+
+    /* Footer: slightly tighter vertical spacing */
+    footer .container {
+      padding-top: 2rem !important;
+      padding-bottom: 2rem !important;
+    }
+
+    /* Mobile toggle: increase tap target a bit for tablet */
+    #mobile-toggle {
+      padding: 0.5rem !important;
+    }
+
+    /* Fix any heavy translate used on desktop so tablet doesn't break layout */
+    img[class*="-translate-x-12"] {
+      transform: translateX(-6px) !important;
+    }
+  }
+
+  @media (min-width:768px) and (max-width:900px) {
+    /* container relative for absolute overlay positioning */
+    [class*="md:grid-cols-12"] { position: relative !important; }
+
+    /* tighten grid: 3 equal columns */
+    [class*="mt-8"][class*="grid"] {
+      grid-template-columns: repeat(3, 1fr) !important;
+      gap: 12px !important;
+      align-items: start !important;
+    }
+
+    /* make each card narrower so 3 fit on one row */
+    [class*="rounded-[16px]"] {
+      width: 100% !important;
+      max-width: 280px !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+    }
+    [class*="w-[384px]"] { width: 100% !important; max-width: 280px !important; }
+
+    /* card images: smaller and consistent */
+    img[alt*="Banded lower body"],
+    img[alt*="Tone & sculpt upper"],
+    img[alt*="Full body power"] {
+      height: 150px !important;
+      width: 100% !important;
+      object-fit: cover !important;
+      display: block !important;
+      border-top-left-radius: 16px !important;
+      border-top-right-radius: 16px !important;
+    }
+
+    /* make the 3rd card sit above background but below overlay */
+    [class*="mt-8"][class*="grid"] > *:nth-child(3) {
+      position: relative !important;
+      z-index: 10 !important;
+    }
+
+    /* overlay default (will be adjusted by JS) — smaller and non-blocking */
+    img[alt*="Programs phones"] {
+      position: absolute !important;
+      max-width: 260px !important;   /* smaller overlay size */
+      width: auto !important;
+      height: auto !important;
+      z-index: 90 !important;
+      pointer-events: none !important;
+      transition: top 160ms ease, left 160ms ease, transform 160ms ease;
+      transform-origin: center center !important;
+      /* provide sensible default in case JS doesn't run */
+      right: -6% !important;
+      top: -24px !important;
+    }
+
+    /* safety: reduce other huge images that push layout */
+    img[alt*="Hero People"] { max-height: 92% !important; min-width: 320px !important; height: auto !important; }
+
+    /* headline/paddings */
+    section[style*="background: #f7f7f7"] { padding-top: 2.4rem !important; padding-bottom: 1.25rem !important; min-height: 460px !important; }
+    section[style*="background: #f7f7f7"] h1 { font-size: 1.95rem !important; line-height: 1.06 !important; } 
+  }
+</style>
+
     </style>
   </head>
 
