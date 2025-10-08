@@ -191,20 +191,19 @@
     section[style*="background: #f7f7f7"] h1 { font-size: 1.95rem !important; line-height: 1.06 !important; } 
   }
 </style>
-
-    </style>
   </head>
 
   <body class="bg-gray-50 min-h-screen">
    <!-- DESKTOP HEADER: دقیقاً همونی که می‌خوای — بدون تغییر -->
+<!-- ---------- Header (desktop + mobile/tablet) ---------- -->
 <header class="desktop-header bg-white shadow-xs hidden md:block">
   <div class="max-w-7xl mx-auto flex items-center justify-between py-4 px-6">
     <img
-  src="f8ffc33b1325031bdf8781ce5b5d6ee0aeddb0ea.png"
-  alt="VRTO Logo"
-  class="h-4 sm:h-6 md:h-10 lg:h-5 w-auto mr-2 sm:mr-4 object-contain -mx-15"
-/>
-    <nav class="hidden md:flex space-x-8 text-sm font-medium text-gray-700 -mx-15">
+      src="f8ffc33b1325031bdf8781ce5b5d6ee0aeddb0ea.png"
+      alt="VRTO Logo"
+      class="h-4 sm:h-6 md:h-10 lg:h-5 w-auto mr-2 sm:mr-4 object-contain -mx-15"
+    />
+    <nav class="desktop-nav hidden md:flex space-x-8 text-sm font-medium text-gray-700 -mx-15">
       <a href="#" style="color:#00A3E0;">Home</a>
       <a href="#">App Features</a>
       <a href="#">Training</a>
@@ -215,23 +214,23 @@
   </div>
 </header>
 
-<!-- MOBILE HEADER: کاملاً جدا و فقط برای < md -->
+<!-- MOBILE / TABLET HEADER -->
 <header class="mobile-header md:hidden bg-white shadow-xs">
   <div class="max-w-7xl mx-auto flex items-center justify-between py-3 px-4">
-    <!-- می‌تونی اندازه لوگو/فضا یا چیزای دیگه رو فقط برای موبایل اینجا تغییر بدی -->
     <img
       src="f8ffc33b1325031bdf8781ce5b5d6ee0aeddb0ea.png"
       alt="VRTO Logo"
       class="h-5 w-auto object-contain"
     />
 
-    <!-- Hamburger (only mobile) -->
+    <!-- Hamburger -->
     <button
       id="mobile-toggle"
       aria-expanded="false"
       aria-controls="mobile-panel"
       class="p-2 rounded-md focus:outline-none"
       title="Open menu"
+      aria-label="باز کردن منو"
     >
       <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
@@ -239,10 +238,9 @@
     </button>
   </div>
 
-  <!-- mobile panel (hidden by default) -->
-  <div id="mobile-panel" class="hidden border-t border-gray-100">
+  <!-- mobile-panel: محتوا در اینجا قرار می‌گیرد. در تبلت باز/بسته می‌شود -->
+  <div id="mobile-panel" class="mobile-panel hidden border-t border-gray-100" aria-hidden="true">
     <div class="px-6 pb-4 pt-3 flex flex-col space-y-2 text-sm font-medium text-gray-700 bg-white">
-      <!-- ترتیب/متن/استایل این لینک‌ها برای موبایل دلخواه قابل تغییر است -->
       <a href="#" class="block py-2 rounded hover:bg-gray-50 !text-[#00A3E0]">Home</a>
       <a href="#" class="block py-2 rounded hover:bg-gray-50">App Features</a>
       <a href="#" class="block py-2 rounded hover:bg-gray-50">Training</a>
@@ -253,6 +251,123 @@
   </div>
 </header>
 
+<!-- ---------- Tablet-specific CSS + small helpers ---------- -->
+<style>
+  /* ===================================================================
+     Behavior:
+     - Default: keep your existing Tailwind classes behavior (mobile < md, desktop >= md).
+     - Tablet (768–900px): hide desktop header, show mobile header, enable toggle.
+     =================================================================== */
+
+  /* Make sure mobile-header becomes visible on tablet and desktop-header hidden for tablet */
+  @media (min-width: 768px) and (max-width: 900px) {
+    .desktop-header { display: none !important; }      /* override md:block */
+    .mobile-header  { display: block !important; }     /* override md:hidden */
+    /* Ensure the internal layout is horizontal like mobile (if you want different, change here) */
+  }
+
+  /* mobile-panel slide down animation (works on mobile/tablet) */
+  /* default: collapsed */
+  .mobile-panel {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 260ms cubic-bezier(.2,.9,.2,1);
+    will-change: max-height;
+  }
+  /* open state: allow enough height for links (adjust if you have more items) */
+  .mobile-panel.open {
+    max-height: 520px; /* suficiente height — تغییر بده اگر آیتم‌ها بیشترند */
+  }
+
+  /* ensure visual parity: border and bg consistent */
+  .mobile-panel .px-6 { background: #fff; }
+
+  /* Accessibility: focus outline for toggle */
+  #mobile-toggle:focus { outline: 2px solid rgba(0,163,224,0.18); outline-offset: 2px; }
+
+  /* Prevent accidental horizontal scroll during panel open on tablet */
+  @media (min-width:768px) and (max-width:900px) {
+    html, body { overflow-x: hidden !important; }
+  }
+</style>
+
+<!-- ---------- JS: toggle + tablet-only behavior + close on outside/ESC ---------- -->
+<script>
+  (function () {
+    const toggle = document.getElementById('mobile-toggle');
+    const panel = document.getElementById('mobile-panel');
+
+    // helper: is tablet range
+    function isTablet() {
+      return window.innerWidth >= 768 && window.innerWidth <= 900;
+    }
+
+    function openPanel() {
+      panel.classList.add('open');
+      panel.classList.remove('hidden');
+      panel.setAttribute('aria-hidden','false');
+      toggle.setAttribute('aria-expanded','true');
+      // focus first link for accessibility
+      const firstLink = panel.querySelector('a');
+      if (firstLink) firstLink.focus();
+    }
+
+    function closePanel() {
+      panel.classList.remove('open');
+      // keep it hidden after transition ends to maintain original hidden class for other sizes
+      panel.setAttribute('aria-hidden','true');
+      toggle.setAttribute('aria-expanded','false');
+      // add small timeout equal to transition to add hidden class back
+      setTimeout(()=> panel.classList.add('hidden'), 300);
+      toggle.focus();
+    }
+
+    // toggle click — only act if tablet OR on small mobile (we keep mobile behavior for <768 too)
+    toggle.addEventListener('click', (e) => {
+      // if not tablet and not mobile (<768), default mobile behavior should still run (we allow it)
+      // but we want to ensure that on tablet we use the same toggle.
+      const expanded = toggle.getAttribute('aria-expanded') === 'true';
+      if (expanded) closePanel(); else openPanel();
+    });
+
+    // Close on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && panel.classList.contains('open')) closePanel();
+    });
+
+    // Close on click outside (when panel open) — useful on tablet
+    document.addEventListener('click', (e) => {
+      if (!panel.classList.contains('open')) return;
+      // If clicked inside panel or on toggle, do nothing
+      if (panel.contains(e.target) || toggle.contains(e.target)) return;
+      closePanel();
+    });
+
+    // On resize: ensure classes/ARIA consistent
+    window.addEventListener('resize', () => {
+      // if leaving tablet to desktop: ensure panel is closed and desktop header visible
+      if (!isTablet()) {
+        // close and hide mobile panel to avoid showing it on desktop accidentally
+        panel.classList.remove('open');
+        panel.classList.add('hidden');
+        panel.setAttribute('aria-hidden','true');
+        toggle.setAttribute('aria-expanded','false');
+      } else {
+        // on entering tablet we leave panel hidden initially
+        panel.classList.add('hidden');
+        panel.setAttribute('aria-hidden','true');
+        toggle.setAttribute('aria-expanded','false');
+      }
+    });
+
+    // initial state: ensure hidden on load unless mobile/tablet wants it visible
+    (function init() {
+      panel.classList.add('hidden');
+      panel.setAttribute('aria-hidden','true');
+      toggle.setAttribute('aria-expanded','false');
+    })();
+  })();
+</script>
 <script>
   (function () {
     const mm = window.matchMedia('(max-width: 767px)'); // md breakpoint = 768px
@@ -308,21 +423,21 @@
 
     <main>
 <section
-  class="relative w-full min-h-[520px] md:min-h-[600px] flex items-center justify-start px-6 pt-16 pb-8 md:pb-0 overflow-hidden"
-  style="background: #f7f7f7"
+  class="relative w-full h-screen flex items-center justify-start px-6 pt-16 pb-0 overflow-hidden"
+  style="background: #f7f7f7;"
 >
   <!-- گرادینت سفید فقط زیر متن‌ها -->
   <div
-    class="absolute left-0 top-0 h-full w-2/3 md:w-1/2 bg-linear-to-r from-white via-white/90 to-transparent z-0"
+    class="absolute left-0 top-0 h-full w-2/3 md:w-1/2 z-0"
+    style="background: linear-gradient(90deg, #ffffff 0%, rgba(255,255,255,0.9) 60%, transparent 100%);"
   ></div>
 
-  <!-- عکس افراد با z-10 -->
-  <!-- فقط اینجا یک کلاس اضافه شد: hero-img -->
+  <!-- عکس افراد: full-viewport, بدون فاصله --> 
   <img
     src="photo_5972253300873087910_w.jpg"
     alt="Hero People"
-    class="absolute right-0 bottom-0 h-full md:h-[95%] w-auto max-w-none object-contain z-10 select-none pointer-events-none hero-img"
-    style="min-width: 500px; max-width: none"
+    class="absolute top-0 right-0 h-screen w-auto max-w-none object-cover z-10 select-none pointer-events-none hero-img"
+    style="object-position: 40% 30%;"
   />
 
   <!-- متن‌ها با z-20 -->
@@ -330,15 +445,15 @@
     <div class="text-lg md:text-xl font-bold !text-[#003C5D] tracking-wide">
       TRUSTED BY <span class="text-sky-500">+250,000</span> PEOPLE WORLDWIDE.
     </div>
-<h1 class="text-3xl md:text-5xl font-extrabold ">
-  <span
-    class="text-4xl"
-    style="background: linear-gradient(90deg, #A3DDF8 0%, #00A3E0 50%, #FF2E92 120%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; display:inline-block;"
-  >
-    READY FOR YOUR STRONGEST,<br class="hidden md:block" />
-    MOST CONFIDENT SELF?
-  </span>
-</h1>
+    <h1 class="text-3xl md:text-5xl font-extrabold ">
+      <span
+        class="text-4xl"
+        style="background: linear-gradient(90deg, #A3DDF8 0%, #00A3E0 50%, #FF2E92 120%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; display:inline-block;"
+      >
+        READY FOR YOUR STRONGEST,<br class="hidden md:block" />
+        MOST CONFIDENT SELF?
+      </span>
+    </h1>
     <p class="text-gray-700 text-lg md:text-xl max-w-2xl">
       Get a plan built for your body, your goals. Take our quiz to start now.
     </p>
@@ -351,53 +466,182 @@
 </section>
 
 
+
 <style>
-  /* فقط برای موبایل: وسط‌چین کردن محتوای تصویر (بدون تغییر اندازه) */
-  @media (max-width: 767px) {
-    .hero-img {
-      /* object-position فقط محتوا را داخل باکس تصویر وسط می‌کند */
-      object-position: 150px
-      /* object-fit در کلاس موجود است (object-contain)، پس object-position تأثیر خواهد داشت */
-    }
+/* ===== Mobile-only: center hero image under the text (no desktop changes) ===== */
+/* === فقط موبایل: جایگزین بلوک موبایل فعلی کن === */
+@media (max-width: 767px) {
+  /* Section: اجازه بده قد بخش به محتوای موبایل منطبق شود */
+  section[style*="background: #f7f7f7"] {
+    min-height: auto !important;
+    height: auto !important;
+    padding-bottom: 2rem !important;
+    overflow: visible !important;
+
+    /* عکس داخل همین سِکشن به صورت ستک‌شده نمایش داده می‌شود:
+       ما از order استفاده می‌کنیم تا تصویر بعد از محتوای متنی قرار بگیرد. */
+    display: flex !important;
+    flex-direction: column !important;
   }
+
+  /* گرادینت سفید پشت متن — فقط بالای سِکشن باشد */
+  section[style*="background: #f7f7f7"] > div:first-child {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    height: 48% !important; /* قابل تنظیم (کم = کوتاه‌تر) */
+    background: linear-gradient(180deg,#ffffff 0%, rgba(255,255,255,0.95) 65%, transparent 100%) !important;
+    z-index: 0 !important;
+    pointer-events: none !important;
+  }
+
+  /* متن‌ها همیشه بالای تصویر بمانند و در سمت چپ قرار گیرند */
+@media (max-width: 767px) {
+  /* مرکز کردن قطعی محتوای متنی و دکمه داخل سِکشن مورد نظر */
+  section[style*="background: #f7f7f7"] > .relative.z-20.max-w-2xl.flex.flex-col,
+  section[style*="background: #f7f7f7"] .hero-content {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;    /* وسط‌چین افقی محتوای داخل باکس */
+    justify-content: center !important;
+    text-align: center !important;     /* متن‌ها وسط شوند */
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    width: 100% !important;
+    max-width: 720px !important;       /* براساس نیاز کم/زیاد کن */
+    box-sizing: border-box !important;
+  }
+
+  /* اگر عناصر داخلی (h1, p, div...) کلاس‌های margin از قبل دارند، پاک‌شان کن */
+  section[style*="background: #f7f7f7"] .hero-content > * {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    text-align: center !important;
+  }
+
+  /* دکمه دقیقاً در مرکز قرار می‌گیرد */
+  section[style*="background: #f7f7f7"] .hero-content button,
+  section[style*="background: #f7f7f7"] .hero-content .btn {
+    display: inline-block !important;
+    margin: 18px auto 0 !important;
+    float: none !important;
+  }
+
+  /* در صورت وجود کلاس‌هایی که padding/translate ایجاد می‌کنند، آن‌ها را لغو کن */
+  section[style*="background: #f7f7f7"] .ml-0,
+  section[style*="background: #f7f7f7"] .md\\:ml-12,
+  section[style*="background: #f7f7f7"] .lg\\:ml-20 {
+    margin-left: 0 !important;
+  }
+}
+  section[style*="background: #f7f7f7"] > div.relative.z-20.max-w-2xl.flex.flex-col.items-start.space-y-6.ml-0 button.mt-4 {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    box-sizing: border-box !important; /* padding در عرض محاسبه شود */
+    margin: 16px 0 0 !important;        /* فاصله از بالا */
+    float: none !important;
+    text-align: center !important;
+  }
+  /* تصویر: مرکز، زیر دکمه/متن، اندازهٔ ثابت نزدیک به نمونه */
+  .hero-img {
+    position: relative !important;
+    display: block !important;
+    order: 2 !important;           /* بعد از متن قرار می‌گیرد */
+    align-self: center !important; /* و به صورت افقی وسط می‌شود */
+
+    /* اندازه: این مقادیر شبیه نمونه موبایل هستند — در صورت نیاز تغییر بده */
+    width: 390px !important;       /* عرضِ تصویر در موبایل (تغییرپذیر) */
+    height: 500px !important;       /* ارتفاع متناسب */
+    margin: 18px auto 28px !important; /* فاصله از دکمه/متن بالایی و پایین */
+
+    /* کارت‌-مانند بودن (مثل نمونه) */
+    background: #fff !important;
+    padding: 6px !important;
+    border-radius: 8px !important;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08) !important;
+
+    /* حفظ سوژه و جلوگیری از برش بالای سر */
+    object-fit: cover !important;           /* اگر نمی‌خواهی هیچ بخشی برش بخورد از contain استفاده کن */
+    object-position: 65% 12% !important;   /* X=center, Y=کمی به سمت بالا — برای دیده شدن موها */
+
+    /* حذف هر موقعیت‌دهی دسکتاپ (top/left/transform) */
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+
+    z-index: 10 !important;
+    pointer-events: none !important;
+    min-width: 0 !important;
+    max-width: 86% !important;     /* در موبایل های خیلی کوچک تصویر هم کوچک شود */
+  }
+
+  /* جلوگیری از اسکرول افقی غیرمنتظره */
+  html, body { margin: 0 !important; padding: 0 !important; overflow-x: hidden !important; }
+}
+
+
 </style>
 
       <!-- EXACT FEATURE SECTION 1 -->
-      <section class="relative overflow-hidden">
+<section class="relative overflow-hidden">
+  <div class="max-w-7xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-12 items-center">
+    <!-- Left: image + confined mellow gradient (گرادینت محدود و ملایم پشت عکس) -->
+    <div class="relative h-[410px] md:h-[530px] overflow-hidden">
+      <!-- confined gradients (absolute, از فلو خارج؛ تاثیری روی ارتفاع ندارند) -->
+      <div class="absolute inset-0 -z-10 pointer-events-none" aria-hidden="true">
         <div
-          class="max-w-7xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-12 items-center"
-        >
-          <!-- Left: single composite image provided -->
-          <div class="relative h-[410px] md:h-[530px]">
-            <img
-              src="mogpng.png"
-              alt="feature composite"
-              class="relative z-10 h-full w-auto max-w-none object-contain select-none pointer-events-none"
-            />
-          </div>
-          <!-- Right: content -->
-          <div>
-            <h2
-              class="text-[22px] md:text-[26px] font-extrabold tracking-tight text-[#003C5D]"
-            >
-              TIRED OF GUESSING WHAT WORKS?
-            </h2>
-            <p class="mt-4 text-[#5B6B79] text-[15px] leading-7">
-              KYTO gives you a clear, personalised plan that adapts weekly to
-              your progress.
-            </p>
-            <p class="mt-4">
-              <span
-                class="rflex font-bold text-[30px] leading-[42px] bg-linear-to-r from-[#00A3E0]/30 via-[#00A3E0] to-[#FF2E92] bg-clip-text text-transparent"
-                >BUILT BY ELITE COACHES</span
-              >
-            </p>
-            <p class="mt-2 text-[#5B6B79] text-[15px] leading-7">
-              Proven methods from 250,000+ successful transformations.
-            </p>
-          </div>
-        </div>
-      </section>
+          class="absolute top-1/2 left-0 transform -translate-y-1/2
+                 w-[85%] md:w-[48%] h-[72%] md:h-[78%] rounded-full"
+          style="
+            background:
+              radial-gradient(40% 60% at 25% 40%, rgba(255,192,203,0.62) 0%, rgba(179,138,241,0.34) 46%, rgba(173,216,230,0.16) 78%),
+              radial-gradient(60% 40% at 72% 68%, rgba(255,248,224,0.14) 0%, rgba(255,200,210,0.05) 36%, transparent 72%);
+            filter: blur(36px);
+          "
+        ></div>
+
+        <div
+          class="absolute top-1/2 left-0 transform -translate-y-1/2
+                 w-[60%] md:w-[32%] h-[48%] md:h-[50%] rounded-full"
+          style="
+            background: radial-gradient(60% 60% at 40% 40%, rgba(255,235,240,0.32) 0%, rgba(232,58,166,0.06) 40%, transparent 70%);
+            filter: blur(18px);
+          "
+        ></div>
+      </div>
+
+      <img
+        src="mogpng-removebg-preview.png"
+        alt="feature composite"
+        class="relative z-10 h-full w-auto max-w-none object-contain select-none pointer-events-none mx-auto"
+      />
+    </div>
+
+    <!-- Right: content — روی دسکتاپ به چپ می‌آید و روی عکس قرار می‌گیرد (overlap) -->
+    <div class="relative z-30 md:-translate-x-12 lg:-translate-x-20">
+      <h2 class="text-[22px] md:text-[26px] font-extrabold tracking-tight text-[#003C5D]">
+        TIRED OF GUESSING WHAT WORKS?
+      </h2>
+      <p class="mt-4 text-[#5B6B79] text-[15px] leading-7">
+        KYTO gives you a clear, personalised plan that adapts weekly to your progress.
+      </p>
+      <p class="mt-4">
+        <span class="rflex font-bold text-[30px] leading-[42px] bg-linear-to-r from-[#00A3E0]/30 via-[#00A3E0] to-[#FF2E92] bg-clip-text text-transparent">
+          BUILT BY ELITE COACHES
+        </span>
+      </p>
+      <p class="mt-2 text-[#5B6B79] text-[15px] leading-7">
+        Proven methods from 250,000+ successful transformations.
+      </p>
+    </div>
+  </div>
+</section>
       <!-- Feature Section 2: Text left, image right (new) -->
       <section class="relative overflow-hidden">
         <div
@@ -441,41 +685,148 @@
       </section>
       <!-- Feature Section 3: Two phones left, text right (new item) -->
       <section class="relative overflow-hidden">
+  <div class="max-w-7xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-12 items-center">
+    <!-- Left: image + confined mellow gradient (گرادینت محدود و ملایم پشت عکس) -->
+    <div class="relative h-[410px] md:h-[530px] overflow-hidden">
+      <!-- confined gradients (absolute, از فلو خارج؛ تاثیری روی ارتفاع ندارند) -->
+      <div class="absolute inset-0 -z-10 pointer-events-none" aria-hidden="true">
         <div
-          class="max-w-7xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-12 items-center"
-        >
-          <!-- Left: provided composite image -->
-      <div class="relative h-[600px] md:h-[660px]">
-  <img
-    src="ko-3.png"
-    alt="Plateau phones"
-    class="absolute left-0 md:-left-6 bottom-0 h-full w-auto object-contain select-none pointer-events-none"
-  />
-</div>
+          class="absolute top-1/2 left-0 transform -translate-y-1/2
+                 w-[85%] md:w-[48%] h-[72%] md:h-[78%] rounded-full"
+          style="
+            background:
+              radial-gradient(40% 60% at 25% 40%, rgba(255,192,203,0.62) 0%, rgba(179,138,241,0.34) 46%, rgba(173,216,230,0.16) 78%),
+              radial-gradient(60% 40% at 72% 68%, rgba(255,248,224,0.14) 0%, rgba(255,200,210,0.05) 36%, transparent 72%);
+            filter: blur(36px);
+          "
+        ></div>
 
-          <!-- Right: content -->
-          <div>
-            <h2
-              class="text-[22px] md:text-[26px] font-extrabold tracking-tight text-[#003C5D]"
-            >
-              HIT A PLATEAU?
-            </h2>
-            <p class="mt-4 text-[#5B6B79] text-[15px] leading-7">
-              Adaptive training and nutrition keep you progressing when results
-              slow.
-            </p>
-            <p class="mt-4">
-              <span
-                class="rflex font-bold text-[30px] leading-[42px] bg-linear-to-r from-[#00A3E0]/30 via-[#00A3E0] to-[#FF2E92] bg-clip-text text-transparent"
-                >SCIENCE-BACKED ADAPTATION</span
-              >
-            </p>
-            <p class="mt-2 text-[#5B6B79] text-[15px] leading-7">
-              Every update is based on proven principles, not guesswork.
-            </p>
-          </div>
-        </div>
-      </section>
+        <div
+          class="absolute top-1/2 left-0 transform -translate-y-1/2
+                 w-[60%] md:w-[32%] h-[48%] md:h-[50%] rounded-full"
+          style="
+            background: radial-gradient(60% 60% at 40% 40%, rgba(255,235,240,0.32) 0%, rgba(232,58,166,0.06) 40%, transparent 70%);
+            filter: blur(18px);
+          "
+        ></div>
+      </div>
+
+      <img
+        src="ko-3-removebg-preview.png"
+        alt="feature composite"
+        class="relative z-10 h-full w-auto max-w-none object-contain select-none pointer-events-none mx-auto"
+      />
+    </div>
+    <!-- Right: content — روی دسکتاپ به چپ می‌آید و روی عکس قرار می‌گیرد (overlap) -->
+    <div class="relative z-30 md:-translate-x-12 lg:-translate-x-20">
+      <h2 class="text-[22px] md:text-[26px] font-extrabold tracking-tight text-[#003C5D]">
+        TIRED OF GUESSING WHAT WORKS?
+      </h2>
+      <p class="mt-4 text-[#5B6B79] text-[15px] leading-7">
+        KYTO gives you a clear, personalised plan that adapts weekly to your progress.
+      </p>
+      <p class="mt-4">
+        <span class="rflex font-bold text-[30px] leading-[42px] bg-linear-to-r from-[#00A3E0]/30 via-[#00A3E0] to-[#FF2E92] bg-clip-text text-transparent">
+          BUILT BY ELITE COACHES
+        </span>
+      </p>
+      <p class="mt-2 text-[#5B6B79] text-[15px] leading-7">
+        Proven methods from 250,000+ successful transformations.
+      </p>
+    </div>
+  </div>
+</section>
+<style>
+  /* ===== Tablet layout fix: image → text (centered) ===== */
+@media (min-width: 768px) and (max-width: 1024px) {
+  /* ساختار کلی بخش: ستون، آیتم‌ها وسط */
+  section.relative.overflow-hidden > .max-w-7xl.mx-auto.px-6.py-20.grid.md\:grid-cols-2 {
+    display: flex !important;
+    flex-direction: column !important; /* عکس بالا، بعد متن */
+    align-items: center !important;
+    text-align: center !important;
+    gap: 2rem !important;
+    padding-top: 2rem !important;
+    padding-bottom: 2rem !important;
+  }
+
+  /* عکس بالا بیاد و در مرکز قرار بگیره */
+  section.relative.overflow-hidden > .max-w-7xl.mx-auto.px-6.py-20.grid.md\:grid-cols-2 > div:first-child {
+    order: 1 !important;
+    width: 100% !important;
+    max-width: 720px !important;
+    margin: 0 auto !important;
+    text-align: center !important;
+  }
+
+  section.relative.overflow-hidden > .max-w-7xl.mx-auto.px-6.py-20.grid.md\:grid-cols-2 > div:first-child img {
+    display: block !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+    max-width: 600px !important;
+    height: auto !important;
+    object-fit: contain !important;
+    object-position: center center !important;
+  }
+
+  /* متن‌ها و دکمه‌ها زیر عکس و وسط‌چین */
+  section.relative.overflow-hidden > .max-w-7xl.mx-auto.px-6.py-20.grid.md\:grid-cols-2 > div:nth-child(2) {
+    order: 2 !important;
+    width: 100% !important;
+    max-width: 720px !important;
+    margin: 0 auto !important;
+    text-align: center !important;
+    transform: none !important;
+    -webkit-transform: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 1rem !important;
+  }
+
+  /* حذف تصویر تکراری که قبلاً با ::after ساخته بودیم */
+  section.relative.overflow-hidden > .max-w-7xl.mx-auto.px-6.py-20.grid.md\:grid-cols-2::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  /* متن‌ها و رنگ‌ها وسط در تبلت */
+  section.relative.overflow-hidden h2,
+  section.relative.overflow-hidden p,
+  section.relative.overflow-hidden button {
+    text-align: center !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  /* فقط تبلت: فقط برای دومین section مشابه،
+   جابجایی صرفِ ترتیب بین wrapper عکس (div:first-child) و محتوای متنی (div:nth-child(2)) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  section.relative.overflow-hidden:nth-of-type(2) > .max-w-7xl.mx-auto.px-6.py-20.grid.md\:grid-cols-2 {
+    /* نگه داشتن ساختار ستونی که قبلاً برای تبلت تعریف کردی */
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+
+  /* متن را اول قرار بده */
+  section.relative.overflow-hidden:nth-of-type(2) > .max-w-7xl.mx-auto.px-6.py-20.grid.md\:grid-cols-2 > div:nth-child(2) {
+    order: 1 !important;        /* متن/دکمه‌ها اول بیایند */
+    align-self: stretch !important;
+    margin: 0 auto !important;
+  }
+
+  /* عکس را بعد از متن قرار بده */
+  section.relative.overflow-hidden:nth-of-type(2) > .max-w-7xl.mx-auto.px-6.py-20.grid.md\:grid-cols-2 > div:first-child {
+    order: 2 !important;        /* عکس بعد از متن بیاید */
+    align-self: center !important;
+    margin: 0 auto !important;
+  }
+}
+
+}
+
+</style>
       <!-- Programs Section: headline + grid + phones (new item) -->
       <section class="relative overflow-hidden">
         <div
@@ -845,7 +1196,6 @@
 
       </div>
     </div>
-    
     <div class="mt-16 pt-8 border-t border-gray-700/50 flex flex-col sm:flex-row justify-between items-center">
       <p class="text-gray-500 text-sm">© Copyright 2025</p>
       
