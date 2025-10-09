@@ -237,7 +237,6 @@
       </svg>
     </button>
   </div>
-
   <!-- mobile-panel: محتوا در اینجا قرار می‌گیرد. در تبلت باز/بسته می‌شود -->
   <div id="mobile-panel" class="mobile-panel hidden border-t border-gray-100" aria-hidden="true">
     <div class="px-6 pb-4 pt-3 flex flex-col space-y-2 text-sm font-medium text-gray-700 bg-white">
@@ -293,133 +292,59 @@
 
 <!-- ---------- JS: toggle + tablet-only behavior + close on outside/ESC ---------- -->
 <script>
-  (function () {
-    const toggle = document.getElementById('mobile-toggle');
-    const panel = document.getElementById('mobile-panel');
+(function () {
+  const toggle = document.getElementById('mobile-toggle');
+  const panel = document.getElementById('mobile-panel');
 
-    // helper: is tablet range
-    function isTablet() {
-      return window.innerWidth >= 768 && window.innerWidth <= 900;
-    }
+  function isTabletOrMobile() {
+    return window.innerWidth <= 900; // موبایل و تبلت
+  }
 
-    function openPanel() {
-      panel.classList.add('open');
-      panel.classList.remove('hidden');
-      panel.setAttribute('aria-hidden','false');
-      toggle.setAttribute('aria-expanded','true');
-      // focus first link for accessibility
-      const firstLink = panel.querySelector('a');
-      if (firstLink) firstLink.focus();
-    }
+  function openPanel() {
+    panel.classList.add('open');
+    panel.classList.remove('hidden');
+    panel.setAttribute('aria-hidden','false');
+    toggle.setAttribute('aria-expanded','true');
+  }
 
-    function closePanel() {
+  function closePanel() {
+    panel.classList.remove('open');
+    panel.setAttribute('aria-hidden','true');
+    toggle.setAttribute('aria-expanded','false');
+    setTimeout(()=> panel.classList.add('hidden'), 300);
+  }
+
+  toggle.addEventListener('click', () => {
+    const expanded = toggle.getAttribute('aria-expanded') === 'true';
+    expanded ? closePanel() : openPanel();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && panel.classList.contains('open')) closePanel();
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!panel.classList.contains('open')) return;
+    if (panel.contains(e.target) || toggle.contains(e.target)) return;
+    closePanel();
+  });
+
+  window.addEventListener('resize', () => {
+    if (!isTabletOrMobile()) {
       panel.classList.remove('open');
-      // keep it hidden after transition ends to maintain original hidden class for other sizes
-      panel.setAttribute('aria-hidden','true');
-      toggle.setAttribute('aria-expanded','false');
-      // add small timeout equal to transition to add hidden class back
-      setTimeout(()=> panel.classList.add('hidden'), 300);
-      toggle.focus();
-    }
-
-    // toggle click — only act if tablet OR on small mobile (we keep mobile behavior for <768 too)
-    toggle.addEventListener('click', (e) => {
-      // if not tablet and not mobile (<768), default mobile behavior should still run (we allow it)
-      // but we want to ensure that on tablet we use the same toggle.
-      const expanded = toggle.getAttribute('aria-expanded') === 'true';
-      if (expanded) closePanel(); else openPanel();
-    });
-
-    // Close on Escape
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && panel.classList.contains('open')) closePanel();
-    });
-
-    // Close on click outside (when panel open) — useful on tablet
-    document.addEventListener('click', (e) => {
-      if (!panel.classList.contains('open')) return;
-      // If clicked inside panel or on toggle, do nothing
-      if (panel.contains(e.target) || toggle.contains(e.target)) return;
-      closePanel();
-    });
-
-    // On resize: ensure classes/ARIA consistent
-    window.addEventListener('resize', () => {
-      // if leaving tablet to desktop: ensure panel is closed and desktop header visible
-      if (!isTablet()) {
-        // close and hide mobile panel to avoid showing it on desktop accidentally
-        panel.classList.remove('open');
-        panel.classList.add('hidden');
-        panel.setAttribute('aria-hidden','true');
-        toggle.setAttribute('aria-expanded','false');
-      } else {
-        // on entering tablet we leave panel hidden initially
-        panel.classList.add('hidden');
-        panel.setAttribute('aria-hidden','true');
-        toggle.setAttribute('aria-expanded','false');
-      }
-    });
-
-    // initial state: ensure hidden on load unless mobile/tablet wants it visible
-    (function init() {
       panel.classList.add('hidden');
       panel.setAttribute('aria-hidden','true');
       toggle.setAttribute('aria-expanded','false');
-    })();
-  })();
+    }
+  });
+
+  // init
+  panel.classList.add('hidden');
+  panel.setAttribute('aria-hidden','true');
+  toggle.setAttribute('aria-expanded','false');
+})();
 </script>
-<script>
-  (function () {
-    const mm = window.matchMedia('(max-width: 767px)'); // md breakpoint = 768px
-    let initialized = false;
 
-    function initMobileMenu() {
-      if (!mm.matches) return; 
-      if (initialized) return;
-      initialized = true;
-
-      const btn = document.getElementById('mobile-toggle');
-      const panel = document.getElementById('mobile-panel');
-      if (!btn || !panel) return;
-
-      btn.addEventListener('click', () => {
-        const open = panel.classList.toggle('hidden') === false;
-        btn.setAttribute('aria-expanded', String(open));
-      });
-
-      panel.querySelectorAll('a').forEach(a => {
-        a.addEventListener('click', () => {
-          panel.classList.add('hidden');
-          btn.setAttribute('aria-expanded', 'false');
-        });
-      });
-
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-          panel.classList.add('hidden');
-          btn.setAttribute('aria-expanded', 'false');
-        }
-      });
-    }
-
-    function destroyMobileMenu() {
-      initialized = false;
-      const panel = document.getElementById('mobile-panel');
-      const btn = document.getElementById('mobile-toggle');
-      if (panel) panel.classList.add('hidden');
-      if (btn) btn.setAttribute('aria-expanded', 'false');
-    }
-
-    function handleChange() {
-      if (mm.matches) initMobileMenu();
-      else destroyMobileMenu();
-    }
-
-    // شروع
-    handleChange();
-    mm.addListener(handleChange); 
-  })();
-</script>
 
     <main>
 <section
@@ -547,28 +472,30 @@
     text-align: center !important;
   }
   /* تصویر: مرکز، زیر دکمه/متن، اندازهٔ ثابت نزدیک به نمونه */
+/* جایگزین برای بلوک .hero-img در @media (max-width: 767px) */
+@media (max-width: 767px) {
   .hero-img {
+    /* حذف کادر و سایه */
+    background: transparent !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+
+    /* موقعیت و اندازه: بعد از متن قرار می‌گیرد و بدون قاب باشد */
     position: relative !important;
     display: block !important;
-    order: 2 !important;           /* بعد از متن قرار می‌گیرد */
-    align-self: center !important; /* و به صورت افقی وسط می‌شود */
+    order: 2 !important;
+    align-self: center !important;
 
-    /* اندازه: این مقادیر شبیه نمونه موبایل هستند — در صورت نیاز تغییر بده */
-    width: 390px !important;       /* عرضِ تصویر در موبایل (تغییرپذیر) */
-    height: 500px !important;       /* ارتفاع متناسب */
-    margin: 18px auto 28px !important; /* فاصله از دکمه/متن بالایی و پایین */
+    /* اندازهٔ قابل تنظیم؛ برای نمایش بدون کادر بهتر است عرض کامل قابل‌اعتماد باشد */
+    width: calc(100% - 0px) !important; /* اگر می‌خواهی کمی فاصله کناری داشته باشد از calc(100% - 32px) */
+    max-width: 900px !important;
+    height: 400px !important;
+    margin: 18px auto 28px !important;
 
-    /* کارت‌-مانند بودن (مثل نمونه) */
-    background: #fff !important;
-    padding: 6px !important;
-    border-radius: 8px !important;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.08) !important;
-
-    /* حفظ سوژه و جلوگیری از برش بالای سر */
-    object-fit: cover !important;           /* اگر نمی‌خواهی هیچ بخشی برش بخورد از contain استفاده کن */
-    object-position: 65% 12% !important;   /* X=center, Y=کمی به سمت بالا — برای دیده شدن موها */
-
-    /* حذف هر موقعیت‌دهی دسکتاپ (top/left/transform) */
+    /* نمایش عکس دقیق و بدون بریدگی ناخواسته */
+    object-fit: cover !important;        /* یا contain اگر نمی‌خواهی هیچ بخشی Crop شود */
+    object-position: 70% 30% !important; /* نگهدار موقعیت سوژه مثل دسکتاپ */
     top: auto !important;
     left: auto !important;
     right: auto !important;
@@ -578,8 +505,18 @@
     z-index: 10 !important;
     pointer-events: none !important;
     min-width: 0 !important;
-    max-width: 86% !important;     /* در موبایل های خیلی کوچک تصویر هم کوچک شود */
+    max-width: 86% !important; /* در موبایل‌های خیلی کوچک اندازه را محدود می‌کند */
   }
+
+  /* اگر قبلاً روی والد .feature-figure یا مشابه، بک‌گراند سفید یا padding گذاشته شده بود */
+  .feature-figure,
+  .feature-figure > .figure-bg {
+    background: transparent !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+}
 
   /* جلوگیری از اسکرول افقی غیرمنتظره */
   html, body { margin: 0 !important; padding: 0 !important; overflow-x: hidden !important; }
@@ -589,515 +526,1041 @@
 </style>
 
       <!-- EXACT FEATURE SECTION 1 -->
-<section class="relative overflow-hidden">
-  <div class="max-w-7xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-12 items-center">
-    <!-- Left: image + confined mellow gradient (گرادینت محدود و ملایم پشت عکس) -->
-    <div class="relative h-[410px] md:h-[530px] overflow-hidden">
-      <!-- confined gradients (absolute, از فلو خارج؛ تاثیری روی ارتفاع ندارند) -->
-      <div class="absolute inset-0 -z-10 pointer-events-none" aria-hidden="true">
-        <div
-          class="absolute top-1/2 left-0 transform -translate-y-1/2
-                 w-[85%] md:w-[48%] h-[72%] md:h-[78%] rounded-full"
-          style="
-            background:
-              radial-gradient(40% 60% at 25% 40%, rgba(255,192,203,0.62) 0%, rgba(179,138,241,0.34) 46%, rgba(173,216,230,0.16) 78%),
-              radial-gradient(60% 40% at 72% 68%, rgba(255,248,224,0.14) 0%, rgba(255,200,210,0.05) 36%, transparent 72%);
-            filter: blur(36px);
-          "
-        ></div>
-
-        <div
-          class="absolute top-1/2 left-0 transform -translate-y-1/2
-                 w-[60%] md:w-[32%] h-[48%] md:h-[50%] rounded-full"
-          style="
-            background: radial-gradient(60% 60% at 40% 40%, rgba(255,235,240,0.32) 0%, rgba(232,58,166,0.06) 40%, transparent 70%);
-            filter: blur(18px);
-          "
-        ></div>
-      </div>
-
-      <img
-        src="mogpng-removebg-preview.png"
-        alt="feature composite"
-        class="relative z-10 h-full w-auto max-w-none object-contain select-none pointer-events-none mx-auto"
-      />
-    </div>
-
-    <!-- Right: content — روی دسکتاپ به چپ می‌آید و روی عکس قرار می‌گیرد (overlap) -->
-    <div class="relative z-30 md:-translate-x-12 lg:-translate-x-20">
-      <h2 class="text-[22px] md:text-[26px] font-extrabold tracking-tight text-[#003C5D]">
-        TIRED OF GUESSING WHAT WORKS?
-      </h2>
-      <p class="mt-4 text-[#5B6B79] text-[15px] leading-7">
-        KYTO gives you a clear, personalised plan that adapts weekly to your progress.
-      </p>
-      <p class="mt-4">
-        <span class="rflex font-bold text-[30px] leading-[42px] bg-linear-to-r from-[#00A3E0]/30 via-[#00A3E0] to-[#FF2E92] bg-clip-text text-transparent">
-          BUILT BY ELITE COACHES
-        </span>
-      </p>
-      <p class="mt-2 text-[#5B6B79] text-[15px] leading-7">
-        Proven methods from 250,000+ successful transformations.
-      </p>
-    </div>
-  </div>
-</section>
-      <!-- Feature Section 2: Text left, image right (new) -->
-      <section class="relative overflow-hidden">
-        <div
-          class="max-w-7xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-12 items-center"
-        >
-          <!-- Left: content -->
-          <div>
-            <h2
-              class="text-[22px] md:text-[26px] font-extrabold tracking-tight text-[#003C5D]"
-            >
-              STRUGGLING TO STAY CONSISTENT?
-            </h2>
-            <p class="mt-4 text-[#5B6B79] text-[15px] leading-7">
-              Swap or shorten workouts and meals without losing momentum.
-            </p>
-            <p class="mt-4">
-              <span
-                class="rflex font-bold text-[30px] leading-[42px] bg-linear-to-r from-[#00A3E0]/30 via-[#00A3E0] to-[#FF2E92] bg-clip-text text-transparent"
-                >PROVEN FLEXIBILITY</span
-              >
-            </p>
-            <p class="mt-2 text-[#5B6B79] text-[15px] leading-7">
-              Thousands stay on track year-round with KYTO’s adaptable
-              structure.
-            </p>
-            <button
-              class="mt-6 px-6 py-3 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-lg shadow-lg"
-            >
-              TAKE THE QUIZ
-            </button>
-          </div>
-          <!-- Right: provided reference image -->
-          <div class="relative">
-            <img
-              src="ob-2.png"
-              alt="Consistency reference"
-              class="relative w-full h-auto md:max-w-[760px] md:max-h-[560px] object-contain rounded-[24px]"
-            />
-          </div>
-        </div>
-      </section>
-      <!-- Feature Section 3: Two phones left, text right (new item) -->
-      <section class="relative overflow-hidden">
-  <div class="max-w-7xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-12 items-center">
-    <!-- Left: image + confined mellow gradient (گرادینت محدود و ملایم پشت عکس) -->
-    <div class="relative h-[410px] md:h-[530px] overflow-hidden">
-      <!-- confined gradients (absolute, از فلو خارج؛ تاثیری روی ارتفاع ندارند) -->
-      <div class="absolute inset-0 -z-10 pointer-events-none" aria-hidden="true">
-        <div
-          class="absolute top-1/2 left-0 transform -translate-y-1/2
-                 w-[85%] md:w-[48%] h-[72%] md:h-[78%] rounded-full"
-          style="
-            background:
-              radial-gradient(40% 60% at 25% 40%, rgba(255,192,203,0.62) 0%, rgba(179,138,241,0.34) 46%, rgba(173,216,230,0.16) 78%),
-              radial-gradient(60% 40% at 72% 68%, rgba(255,248,224,0.14) 0%, rgba(255,200,210,0.05) 36%, transparent 72%);
-            filter: blur(36px);
-          "
-        ></div>
-
-        <div
-          class="absolute top-1/2 left-0 transform -translate-y-1/2
-                 w-[60%] md:w-[32%] h-[48%] md:h-[50%] rounded-full"
-          style="
-            background: radial-gradient(60% 60% at 40% 40%, rgba(255,235,240,0.32) 0%, rgba(232,58,166,0.06) 40%, transparent 70%);
-            filter: blur(18px);
-          "
-        ></div>
-      </div>
-
-      <img
-        src="ko-3-removebg-preview.png"
-        alt="feature composite"
-        class="relative z-10 h-full w-auto max-w-none object-contain select-none pointer-events-none mx-auto"
-      />
-    </div>
-    <!-- Right: content — روی دسکتاپ به چپ می‌آید و روی عکس قرار می‌گیرد (overlap) -->
-    <div class="relative z-30 md:-translate-x-12 lg:-translate-x-20">
-      <h2 class="text-[22px] md:text-[26px] font-extrabold tracking-tight text-[#003C5D]">
-        TIRED OF GUESSING WHAT WORKS?
-      </h2>
-      <p class="mt-4 text-[#5B6B79] text-[15px] leading-7">
-        KYTO gives you a clear, personalised plan that adapts weekly to your progress.
-      </p>
-      <p class="mt-4">
-        <span class="rflex font-bold text-[30px] leading-[42px] bg-linear-to-r from-[#00A3E0]/30 via-[#00A3E0] to-[#FF2E92] bg-clip-text text-transparent">
-          BUILT BY ELITE COACHES
-        </span>
-      </p>
-      <p class="mt-2 text-[#5B6B79] text-[15px] leading-7">
-        Proven methods from 250,000+ successful transformations.
-      </p>
-    </div>
-  </div>
-</section>
 <style>
-  /* ===== Tablet layout fix: image → text (centered) ===== */
-@media (min-width: 768px) and (max-width: 1024px) {
-  /* ساختار کلی بخش: ستون، آیتم‌ها وسط */
-  section.relative.overflow-hidden > .max-w-7xl.mx-auto.px-6.py-20.grid.md\:grid-cols-2 {
-    display: flex !important;
-    flex-direction: column !important; /* عکس بالا، بعد متن */
-    align-items: center !important;
-    text-align: center !important;
-    gap: 2rem !important;
-    padding-top: 2rem !important;
-    padding-bottom: 2rem !important;
+  /* ===== پایه صفحه ===== */
+  :root{
+    --max-w: 1200px;
+    --accent-700: #003C5D;
+    --muted: #5B6B79;
+  }
+  body{ font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; margin:0; background:#fff; color:#0b1220; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+  .max-w-7xl{ max-width:var(--max-w); margin:0 auto; }
+
+  /* ===== بخش های مشترک ===== */
+  section.relative{ position:relative; }
+  .overflow-hidden{ overflow:hidden; }
+  .px-6{ padding-left:1.5rem; padding-right:1.5rem; }
+  .py-20{ padding-top:5rem; padding-bottom:5rem; }
+  .grid{ display:grid; }
+  .md\:grid-cols-2{ grid-template-columns: 1fr 1fr; }
+  .gap-12{ gap:3rem; }
+  .items-center{ align-items:center; }
+
+  /* عناوین و متن */
+  h2{ margin:0; color:var(--accent-700); font-weight:800; }
+  p{ margin:0; color:var(--muted); }
+
+  /* دکمه ساده */
+  .btn-quiz{
+    margin-top:1.5rem;
+    padding:0.75rem 1.5rem;
+    background:linear-gradient(90deg,#00A3E0,#FF2E92);
+    color:#fff;
+    border-radius:12px;
+    border:none;
+    font-weight:700;
+    cursor:pointer;
+    box-shadow:0 8px 24px rgba(0,0,0,0.08);
+  }
+  .btn-quiz:hover{ transform:translateY(-2px); transition:all 180ms ease; }
+
+  /* ===== ساختار کلی feature-figure ===== */
+  .feature-figure {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible; /* اجازه می‌دهد گرادینت نرم بیرون بزند */
   }
 
-  /* عکس بالا بیاد و در مرکز قرار بگیره */
-  section.relative.overflow-hidden > .max-w-7xl.mx-auto.px-6.py-20.grid.md\:grid-cols-2 > div:first-child {
-    order: 1 !important;
-    width: 100% !important;
-    max-width: 720px !important;
-    margin: 0 auto !important;
-    text-align: center !important;
+  .feature-figure .figure-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: 20px;
+    pointer-events: none;
+    overflow: visible;
+    transform-origin: center;
+    mix-blend-mode: normal;
   }
 
-  section.relative.overflow-hidden > .max-w-7xl.mx-auto.px-6.py-20.grid.md\:grid-cols-2 > div:first-child img {
-    display: block !important;
-    margin: 0 auto !important;
-    width: 100% !important;
-    max-width: 600px !important;
-    height: auto !important;
-    object-fit: contain !important;
-    object-position: center center !important;
-  }
-
-  /* متن‌ها و دکمه‌ها زیر عکس و وسط‌چین */
-  section.relative.overflow-hidden > .max-w-7xl.mx-auto.px-6.py-20.grid.md\:grid-cols-2 > div:nth-child(2) {
-    order: 2 !important;
-    width: 100% !important;
-    max-width: 720px !important;
-    margin: 0 auto !important;
-    text-align: center !important;
-    transform: none !important;
-    -webkit-transform: none !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 1rem !important;
-  }
-
-  /* حذف تصویر تکراری که قبلاً با ::after ساخته بودیم */
-  section.relative.overflow-hidden > .max-w-7xl.mx-auto.px-6.py-20.grid.md\:grid-cols-2::after {
-    content: none !important;
-    display: none !important;
-  }
-
-  /* متن‌ها و رنگ‌ها وسط در تبلت */
-  section.relative.overflow-hidden h2,
-  section.relative.overflow-hidden p,
-  section.relative.overflow-hidden button {
-    text-align: center !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-  }
-  /* فقط تبلت: فقط برای دومین section مشابه،
-   جابجایی صرفِ ترتیب بین wrapper عکس (div:first-child) و محتوای متنی (div:nth-child(2)) */
-@media (min-width: 768px) and (max-width: 1024px) {
-  section.relative.overflow-hidden:nth-of-type(2) > .max-w-7xl.mx-auto.px-6.py-20.grid.md\:grid-cols-2 {
-    /* نگه داشتن ساختار ستونی که قبلاً برای تبلت تعریف کردی */
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-  }
-
-  /* متن را اول قرار بده */
-  section.relative.overflow-hidden:nth-of-type(2) > .max-w-7xl.mx-auto.px-6.py-20.grid.md\:grid-cols-2 > div:nth-child(2) {
-    order: 1 !important;        /* متن/دکمه‌ها اول بیایند */
-    align-self: stretch !important;
-    margin: 0 auto !important;
-  }
-
-  /* عکس را بعد از متن قرار بده */
-  section.relative.overflow-hidden:nth-of-type(2) > .max-w-7xl.mx-auto.px-6.py-20.grid.md\:grid-cols-2 > div:first-child {
-    order: 2 !important;        /* عکس بعد از متن بیاید */
-    align-self: center !important;
-    margin: 0 auto !important;
-  }
+  /* ===== گرادینت پخش‌شونده برای عکس 1 (گرم و پراکنده) ===== */
+/* Apply the same stronger warm-cool blended gradient to images 1 and 3 (same as image 2) */
+.figure-bg-1{
+  background:
+    /* larger warm wash */
+    radial-gradient(110% 90% at 22% 36%,
+      rgba(255,46,146,0.16) 0%,
+      rgba(255,46,146,0.10) 18%,
+      rgba(255,46,146,0.04) 34%,
+      rgba(255,46,146,0.00) 60%),
+    /* focused cyan center to add depth */
+    radial-gradient(80% 70% at 62% 58%,
+      rgba(0,163,224,0.18) 0%,
+      rgba(0,163,224,0.10) 28%,
+      rgba(163,221,248,0.04) 56%,
+      rgba(163,221,248,0.00) 80%),
+    /* subtle linear lift */
+    linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
+  filter: blur(32px);
+  transform: scale(1.05);
+  opacity: 0.98;
+  background-repeat: no-repeat;
 }
 
+
+  /* ===== گرادینت خنثی/ملایم برای عکس 2 (مثلاً آبی ملایم) =====
+     (عکس 2 از گرادینت کلی استفاده می‌کند اما نه با خطوط) */
+/* stronger, warm-cool blended gradient for image 2 (behind the image ) */
+.figure-bg-2 {
+  background:
+    /* larger warm wash */
+    radial-gradient(110% 90% at 22% 36%,
+      rgba(255,46,146,0.16) 20%,
+      rgba(255,46,146,0.10) 28%,
+      rgba(255,46,146,0.04) 44%,
+      rgba(255,46,146,0.00) 70%),
+    /* focused cyan center to add depth */
+    radial-gradient(80% 70% at 62% 58%,
+      rgba(0,163,224,0.18) 0%,
+      rgba(0,163,224,0.10) 28%,
+      rgba(163,221,248,0.04) 56%,
+      rgba(163,221,248,0.00) 80%),
+    /* subtle linear lift */
+    linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
+  filter: blur(32px);
+  transform: scale(1.05);
+  opacity: 0.98;
+  background-repeat: no-repeat;
+}
+
+  /* ===== گرادینت پخش‌شونده برای عکس 3 (صورتی-زنجبیلی ملایم) ===== */
+/* Apply the same stronger warm-cool blended gradient to images 1 and 3 (same as image 2) */
+.figure-bg-3 {
+  background:
+    /* larger warm wash */
+    radial-gradient(110% 90% at 22% 36%,
+      rgba(255,46,146,0.16) 0%,
+      rgba(255,46,146,0.10) 18%,
+      rgba(255,46,146,0.04) 34%,
+      rgba(255,46,146,0.00) 60%),
+    /* focused cyan center to add depth */
+    radial-gradient(80% 70% at 62% 58%,
+      rgba(0,163,224,0.18) 0%,
+      rgba(0,163,224,0.10) 28%,
+      rgba(163,221,248,0.04) 56%,
+      rgba(163,221,248,0.00) 80%),
+    /* subtle linear lift */
+    linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
+  filter: blur(32px);
+  transform: scale(1.05);
+  opacity: 0.98;
+  background-repeat: no-repeat;
+}
+
+
+  /* یک لایهٔ درونی برای نرم‌تر کردن لبه‌ها */
+  .feature-figure .figure-bg::after{
+    content: "";
+    position: absolute;
+    inset: 6% 6% 6% 6%;
+    border-radius: 50%;
+    background: transparent;
+    filter: blur(28px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* تصویر رویی */
+  .feature-figure .figure-img {
+    position: relative;
+    z-index: 2;
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    border-radius: 16px;
+    object-fit: contain;
+    display: block;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* ===== layout اصلی هر section (grid برای دسکتاپ) ===== */
+  .section-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+  }
+
+  /* responsive عمومی */
+  @media (max-width: 1024px) {
+    .max-w-7xl{ padding-left:1rem; padding-right:1rem; }
+  }
+
+  /* ===== تنظیم ویژه برای تبلت: تبدیل به ستون و مرکز کردن (فقط تبلت) ===== */
+  @media (min-width: 768px) and (max-width: 1024px) {
+    .section-grid {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      text-align: center !important;
+      gap: 2rem !important;
+      padding-top: 2rem !important;
+      padding-bottom: 2rem !important;
+    }
+    .section-grid > .col-left,
+    .section-grid > .col-right {
+      width: 100% !important;
+      max-width: 720px !important;
+      margin: 0 auto !important;
+      text-align: center !important;
+    }
+    .section-grid > .col-left img,
+    .section-grid > .col-right img {
+      display:block; margin:0 auto; width:100%; max-width:700px; height:auto; object-fit:contain;
+    }
+    /* برای بخش دوم (که متن اول می‌آید) ترتیب را تغییر می‌دهیم */
+    .section-grid.order-text-first { flex-direction: column-reverse !important; }
+  }
+
+  /* موبایل: کاهش blur و اندازه جهت عملکرد بهتر */
+  @media (max-width: 767px) {
+    .figure-bg-1 { filter: blur(22px) !important; transform: scale(1.02) !important; }
+    .figure-bg-2 { filter: blur(18px) !important; transform: scale(1.02) !important; }
+    .figure-bg-3 { filter: blur(20px) !important; transform: scale(1.02) !important; }
+    .feature-figure .figure-bg::after { filter: blur(12px) !important; }
+  }
+
+  /* افکت‌های کوچک ظاهری */
+ 
+</style>
+</head>
+<body>
+
+  <!-- Feature Section 1: IMAGE LEFT (با گرادینت گرم پراکنده) -->
+<!-- HTML: همان ساختار شما (بدون تغییر) -->
+<section class="relative overflow-hidden">
+  <div class="max-w-7xl mx-auto px-6 py-20 section-grid">
+    <div class="col-left" style="--order:1">
+      <div class="feature-figure">
+        <div class="figure-bg figure-bg-1" aria-hidden="true"></div>
+        <img src="mogpng-removebg-preview.png" alt="Feature image 1" class="figure-img" />
+      </div>
+    </div>
+
+    <div class="col-right" style="--order:2">
+      <div style="max-width:520px; margin:0 auto;">
+        <h2 class="text-[22px] md:text-[26px] font-extrabold tracking-tight text-[#003C5D]">
+          TIRED OF GUESSING WHAT WORKS?
+        </h2>
+        <p class="mt-4 text-[#5B6B79] text-[15px] leading-7">
+          KYTO gives you a clear, personalised plan that adapts weekly to your progress.
+        </p>
+        <p class="mt-4">
+          <span class="rflex font-bold text-[30px] leading-[42px] bg-linear-to-r from-[#00A3E0]/30 via-[#00A3E0] to-[#FF2E92] bg-clip-text text-transparent">
+            BUILT BY ELITE COACHES
+          </span>
+        </p>
+        <p class="mt-2 text-[#5B6B79] text-[15px] leading-7">
+          Proven methods from 250,000+ successful transformations.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="relative overflow-hidden">
+  <div class="max-w-7xl mx-auto px-6 py-20 section-grid order-text-first">
+    <div class="col-left">
+      <div style="max-width:520px; margin:0 auto;">
+        <h2 class="text-[22px] md:text-[26px] font-extrabold tracking-tight text-[#003C5D]">
+          STRUGGLING TO STAY CONSISTENT?
+        </h2>
+        <p class="mt-4 text-[#5B6B79] text-[15px] leading-7">
+          Swap or shorten workouts and meals without losing momentum.
+        </p>
+        <p class="mt-4">
+          <span class="rflex font-bold text-[30px] leading-[42px] bg-linear-to-r from-[#00A3E0]/30 via-[#00A3E0] to-[#FF2E92] bg-clip-text text-transparent">
+            PROVEN FLEXIBILITY
+          </span>
+        </p>
+        <p class="mt-2 text-[#5B6B79] text-[15px] leading-7">
+          Thousands stay on track year-round with KYTO’s adaptable structure.
+        </p>
+        <button class="btn-quiz">TAKE THE QUIZ</button>
+      </div>
+    </div>
+
+    <div class="col-right">
+      <div class="feature-figure">
+        <div class="figure-bg figure-bg-2" aria-hidden="true"></div>
+        <img src="ob-2-removebg-preview.png" alt="Consistency reference" class="figure-img rounded-[24px]" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="relative overflow-hidden">
+  <div class="max-w-7xl mx-auto px-6 py-20 section-grid">
+    <div class="col-left">
+      <div class="feature-figure">
+        <div class="figure-bg figure-bg-3" aria-hidden="true"></div>
+        <img src="ko-3-removebg-preview.png" alt="Feature image 3" class="figure-img" />
+      </div>
+    </div>
+
+    <div class="col-right">
+      <div style="max-width:520px; margin:0 auto;">
+        <h2 class="text-[22px] md:text-[26px] font-extrabold tracking-tight text-[#003C5D]">
+          TIRED OF GUESSING WHAT WORKS?
+        </h2>
+        <p class="mt-4 text-[#5B6B79] text-[15px] leading-7">
+          KYTO gives you a clear, personalised plan that adapts weekly to your progress.
+        </p>
+        <p class="mt-4">
+          <span class="rflex font-bold text-[30px] leading-[42px] bg-linear-to-r from-[#00A3E0]/30 via-[#00A3E0] to-[#FF2E92] bg-clip-text text-transparent">
+            BUILT BY ELITE COACHES
+          </span>
+        </p>
+        <p class="mt-2 text-[#5B6B79] text-[15px] leading-7">
+          Proven methods from 250,000+ successful transformations.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Mobile-only CSS: image first, then text; center everything ===== -->
+<style>
+  /* اعمال فقط در موبایل */
+  @media (max-width: 767px) {
+
+    /* 1) هر section .section-grid را ستونی می‌کنیم */
+    .section-grid {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      text-align: center !important;
+      gap: 1.25rem !important;
+      padding-top: 1.25rem !important;
+      padding-bottom: 1.25rem !important;
+    }
+
+    /* 2) تصویر را قبل از متن قرار بده (order) و کاملاً مرکز کن */
+    .section-grid > .col-left { order: 1 !important; width: 100% !important; max-width: 720px; margin: 0 auto; }
+    .section-grid > .col-right { order: 2 !important; width: 100% !important; max-width: 720px; margin: 0 auto; }
+
+    /* برای بخش‌هایی که order-text-first دارند، متن باید اول بیاید و تصویر بعد (همچنان ستون است) */
+    .section-grid.order-text-first > .col-left { order: 2 !important; }  /* content */
+    .section-grid.order-text-first > .col-right { order: 1 !important; } /* image */
+
+    /* 3) تصویر: بدون کادر، عرض مناسب و مرکز */
+    .feature-figure { display: flex; align-items: center; justify-content: center; padding: 0 !important; background: transparent !important; }
+    .feature-figure .figure-bg { display: none !important; } /* اگر لازم نیست پشت تصویر در موبایل، مخفی کن؛ در غیر این صورت حذف این خط */
+    .feature-figure .figure-img {
+      position: relative !important;
+      order: 1 !important;
+      display: block !important;
+      width: 100% !important;
+      max-width: 760px !important;
+      height: auto !important;
+      margin: 0 auto 0.75rem !important;
+      object-fit: contain !important;
+      object-position: 50% 40% !important;
+      border-radius: 0 !important;  /* بدون قاب */
+      background: transparent !important;
+      padding: 0 !important;
+      box-shadow: none !important;
+    }
+
+    /* 4) متن‌ها: وسط‌چین و فواصلی که از قبل داشتند را کم کن */
+    .section-grid .col-right > div,
+    .section-grid .col-left > div {
+      width: 100% !important;
+      padding-left: 1rem !important;
+      padding-right: 1rem !important;
+      box-sizing: border-box !important;
+    }
+    .section-grid h2 { text-align: center !important; margin: 0 auto 0.5rem !important; }
+    .section-grid p { text-align: center !important; margin: 0.25rem 0 !important; }
+
+    /* 5) دکمه‌ها تمام عرض یا مرکزی (اختیاری: می‌تونی full-width یا auto بگذاری) */
+    .btn-quiz {
+      width: calc(100% - 2rem) !important;
+      max-width: 420px !important;
+      margin: 0.75rem auto 0 !important;
+      display: block !important;
+    }
+
+    /* 6) جلوگیری از اسکرول افقی */
+    html, body { overflow-x: hidden !important; }
+
+    /* 7) اگر خواستی figure-bg را نمایش دهی، می‌توانی opacity و blur آن را کاهش دهی:
+       (مثال: نمایش بسیار ملایم پشت تصویر در موبایل) */
+    /*
+    .feature-figure .figure-bg {
+      display: block !important;
+      opacity: 0.12 !important;
+      filter: blur(18px) !important;
+    }
+    */
+  }
+  /* CSS: اضافه کن به انتهای stylesheet یا داخل تگ <style> صفحه */
+/* فقط موبایل: مخفی کردن کامل بخش با کلاس hide-on-mobile */
+@media (max-width: 767px) {
+  .hide-on-mobile {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}
+/* فقط موبایل: مخفی کردن کامل بخش با کلاس hide-on-mobile */
+@media (max-width: 767px) {
+  .hide-on-mobile {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
 }
 
 </style>
-      <!-- Programs Section: headline + grid + phones (new item) -->
-      <section class="relative overflow-hidden">
-        <div
-          class="max-w-7xl mx-auto px-6 py-20 grid md:grid-cols-12 gap-10 items-start"
-        >
-          <!-- Left content area (heading + subtext + grid) -->
-          <div class="md:col-span-9 lg:col-span-9">
-            <h2
-              class="text-[22px] md:text-[26px] font-extrabold tracking-tight text-[#003C5D]"
-            >
-              TRAINING THAT BUILDS MORE THAN MUSCLE
-            </h2>
-            <p class="mt-3 text-[#5B6B79] text-[15px] leading-7 max-w-2xl">
-              Programs with purpose. Progress without plateaus. No random
-              workouts. No fluff. KYTO gives you a coaching path. Every program
-              is part of a structured progression path designed to change your
-              body and how you train it.
-            </p>
 
-            <!-- Grid of program cards (3 items) -->
-            <div class="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-12">
-              <!-- Card 1 with image -->
-              <div
-                class="rounded-[16px] overflow-hidden bg-white border border-slate-200 shadow-sm w-[384px]"
-              >
-                <img
-                  src="bc3f986eac29d2f6ddf6c0d751c59bd061b4c213.jpg"
-                  alt="Banded lower body"
-                  class="w-[384px] h-[220px] object-cover rounded-t-[16px] select-none pointer-events-none"
-                />
-                <div
-                  class="p-3 w-[384px] h-[120px] overflow-hidden rounded-b-[16px] bg-white"
-                >
-                  <p class="text-[12px] font-semibold text-sky-600">BEGINNER</p>
-                  <p class="mt-1 text-[13px] font-bold text-[#083A5A] truncate">
-                    TOTAL STRENGTH &amp; METCON
-                  </p>
-                  <div class="mt-2 flex flex-col items-start gap-2 text-[12px] text-[#5B6B79]">
-      <span class="flex items-center gap-2">
-        <!-- clock icon -->
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/>
-          <path d="M12 7v6l4 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span>8 Weeks</span>
-      </span>
+<!-- HTML: همان بخش شما با اضافه کردن کلاس hide-on-mobile -->
+<section class="relative overflow-hidden hide-on-mobile">
+  <div class="max-w-7xl mx-auto px-6 py-20 grid md:grid-cols-12 gap-10 items-start">
+    <!-- Left content area (heading + subtext + grid) -->
+    <div class="md:col-span-9 lg:col-span-9">
+      <h2 class="text-[22px] md:text-[26px] font-extrabold tracking-tight text-[#003C5D]">
+        TRAINING THAT BUILDS MORE THAN MUSCLE
+      </h2>
+      <p class="mt-3 text-[#5B6B79] text-[15px] leading-7 max-w-2xl">
+        Programs with purpose. Progress without plateaus. No random workouts. No fluff. KYTO gives you a coaching path. Every program is part of a structured progression path designed to change your body and how you train it.
+      </p>
 
-      <span class="flex items-center gap-2">
-        <!-- stopwatch / minute icon -->
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path d="M9 2h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          <circle cx="12" cy="14" r="7" stroke="currentColor" stroke-width="1.5"/>
-          <path d="M12 11v3l2 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span>40min</span>
-      </span>
+      <!-- Grid of program cards (3 items) -->
+      <div class="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-12">
+        <!-- Card 1 -->
+        <div class="rounded-[16px] overflow-hidden bg-white border border-slate-200 shadow-sm w-[384px]">
+          <img src="bc3f986eac29d2f6ddf6c0d751c59bd061b4c213.jpg" alt="Banded lower body" class="w-[384px] h-[220px] object-cover rounded-t-[16px] select-none pointer-events-none" />
+          <div class="p-3 w-[384px] h-[120px] overflow-hidden rounded-b-[16px] bg-white">
+            <p class="text-[12px] font-semibold text-sky-600">BEGINNER</p>
+            <p class="mt-1 text-[13px] font-bold text-[#083A5A] truncate">TOTAL STRENGTH &amp; METCON</p>
+            <div class="mt-2 flex flex-col items-start gap-2 text-[12px] text-[#5B6B79]">
+              <span class="flex items-center gap-2">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M12 7v6l4 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>8 Weeks</span>
+              </span>
+              <span class="flex items-center gap-2">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M9 2h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="14" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M12 11v3l2 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>40min</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="rounded-[16px] overflow-hidden bg-white border border-slate-200 shadow-sm w-[384px]">
+          <img src="6e6aaf32471c99ddc1daf11515ab7bebea07a8f6.jpg" alt="Tone & sculpt upper" class="w-[384px] h-[220px] object-cover rounded-t-[16px] select-none pointer-events-none" />
+          <div class="p-3 w-[384px] h-[120px] overflow-hidden rounded-b-[16px] bg-white">
+            <p class="text-[12px] font-semibold text-sky-600">INTERMEDIATE</p>
+            <p class="mt-1 text-[13px] font-bold text-[#003C5D] truncate">BANDED LOWER BODY SCULPT</p>
+            <div class="mt-2 flex flex-col items-start gap-2 text-[12px] text-[#5B6B79]">
+              <span class="flex items-center gap-2">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M12 7v6l4 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>8 Weeks</span>
+              </span>
+              <span class="flex items-center gap-2">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M9 2h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="14" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M12 11v3l2 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>40min</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="rounded-[16px] overflow-hidden bg-white border border-slate-200 shadow-sm w-[384px]">
+          <img src="a107e1d00986c65f47324c2d3107d9161fbb2f53.jpg" alt="Full body power" class="w-[384px] h-[220px] object-cover rounded-t-[16px] select-none pointer-events-none" />
+          <div class="p-3 w-[384px] h-[120px] overflow-hidden rounded-b-[16px] bg-white">
+            <p class="text-[12px] font-semibold text-sky-600">ADVANCED</p>
+            <p class="mt-1 text-[13px] font-bold text-[#003C5D] truncate">TONE &amp; SCULPT YOUR UPPER ⚡</p>
+            <div class="mt-2 flex flex-col items-start gap-2 text-[12px] text-[#5B6B79]">
+              <span class="flex items-center gap-2">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M12 7v6l4 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>12 Weeks</span>
+              </span>
+              <span class="flex items-center gap-2">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M9 2h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="14" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M12 11v3l2 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>45min (20min express version)</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-                </div>
-              </div>
 
-              <!-- Card 2 with image -->
-        <div
-  class="rounded-[16px] overflow-hidden bg-white border border-slate-200 shadow-sm w-[384px]"
->
-  <img
-    src="6e6aaf32471c99ddc1daf11515ab7bebea07a8f6.jpg"
-    alt="Tone & sculpt upper"
-    class="w-[384px] h-[220px] object-cover rounded-t-[16px] select-none pointer-events-none"
-  />
-  <div
-    class="p-3 w-[384px] h-[120px] overflow-hidden rounded-b-[16px] bg-white"
-  >
-    <p class="text-[12px] font-semibold text-sky-600">
-      INTERMEDIATE
-    </p>
-    <p class="mt-1 text-[13px] font-bold text-[#003C5D] truncate">
-      BANDED LOWER BODY SCULPT
-    </p>
-
-    <div class="mt-2 flex flex-col items-start gap-2 text-[12px] text-[#5B6B79]">
-      <span class="flex items-center gap-2">
-        <!-- clock icon -->
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/>
-          <path d="M12 7v6l4 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span>8 Weeks</span>
-      </span>
-
-      <span class="flex items-center gap-2">
-        <!-- stopwatch / minute icon -->
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path d="M9 2h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          <circle cx="12" cy="14" r="7" stroke="currentColor" stroke-width="1.5"/>
-          <path d="M12 11v3l2 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span>40min</span>
-      </span>
+    <!-- Right: provided image (bigger and overlapping) -->
+    <div class="md:col-span-3 lg:col-span-3 relative min-h-[420px] md:min-h-[520px] flex items-start justify-start ml-0 md:-ml-32 lg:-ml-20 z-40">
+      <img src="photo_5985493027189281098_w-removebg-preview.png" alt="Programs phones" class="relative z-40 w-full h-auto md:max-w-[640px] lg:max-w-[780px] object-contain select-none pointer-events-none md:-translate-x-12 lg:-translate-x-0" />
     </div>
   </div>
-</div>
+</section>
 
+<section class="relative overflow-hidden hide-on-mobile">
+    <div
+      class="max-w-7xl mx-auto px-6 py-20 md:py-28 grid md:grid-cols-2 gap-20 items-start"
+    >
+      <div class="relative flex justify-center md:justify-start md:h-full md:min-h-[500px]">
+        <img
+          src="photo_5978857590479767212_w-removebg-preview.png"
+          alt="Nutrition phones (replace this image)"
+          class="
+            w-[620px] md:w-full md:max-w-[700px] object-contain select-none pointer-events-none transform -rotate-6 relative -top-32 md-top-40  md:absolute md:top-0 md:bottom-0 md:m-auto md:scale-125
+          "
+        />
+        <div class="hidden md:block absolute bottom-0 left-6 w-[340px] h-24 rounded-2xl opacity-20 filter blur-xl bg-linear-to-r from-transparent to-transparent"></div>
+      </div>
 
-              <!-- Card 3 with image -->
-              <div
-                class="rounded-[16px] overflow-hidden bg-white border border-slate-200 shadow-sm w-[384px]"
-              >
-                <img
-                  src="a107e1d00986c65f47324c2d3107d9161fbb2f53.jpg"
-                  alt="Full body power"
-                  class="w-[384px] h-[220px] object-cover rounded-t-[16px] select-none pointer-events-none"
-                />
-                <div
-                  class="p-3 w-[384px] h-[120px] overflow-hidden rounded-b-[16px] bg-white"
-                >
-                  <p class="text-[12px] font-semibold text-sky-600">ADVANCED</p>
-                  <p class="mt-1 text-[13px] font-bold text-[#003C5D] truncate">
-                    TONE &amp; SCULPT YOUR UPPER ⚡
-                  </p>
-              <div class="mt-2 flex flex-col items-start gap-2 text-[12px] text-[#5B6B79]">
-  <span class="flex items-center gap-2">
-    <!-- clock icon -->
-    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/>
-      <path d="M12 7v6l4 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-    <span>12 Weeks</span>
-  </span>
-
-  <span class="flex items-center gap-2">
-    <!-- stopwatch / minute icon -->
-    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path d="M9 2h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-      <circle cx="12" cy="14" r="7" stroke="currentColor" stroke-width="1.5"/>
-      <path d="M12 11v3l2 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-    <span>45min (20min express version)</span>
-  </span>
-</div>
-
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Right: provided image (bigger and overlapping) -->
-          <div
-            class="md:col-span-3 lg:col-span-3 relative min-h-[420px] md:min-h-[520px] flex items-start justify-start ml-0 md:-ml-32 lg:-ml-20 z-40"
-          >
-            <img
-              src="photo_5985493027189281098_w-removebg-preview.png"
-              alt="Programs phones"
-              class="relative z-40 w-full h-auto md:max-w-[640px] lg:max-w-[780px] object-contain select-none pointer-events-none md:-translate-x-12 lg:-translate-x-0"
-            />
-          </div>
-        </div>
-      </section>
-
-<section class="relative bg-[linear-gradient(180deg,#eaf6fb,white)]">
-    <div class="max-w-7xl mx-auto px-6 py-20 md:py-28 grid md:grid-cols-2 gap-20 items-start">
-        <div class="relative flex justify-center md:justify-start md:h-full md:min-h-[500px]"> 
-            <img
-                src="photo_5978857590479767212_w-removebg-preview.png"
-                alt="Nutrition phones (replace this image)"
-                
-                class="
-                    w-[620px] md:w-full md:max-w-[700px] object-contain select-none pointer-events-none transform -rotate-6 relative -top-32 md-top-40  md:absolute md:top-0 md:bottom-0 md:m-auto md:scale-125"
-                
-            />
-            <div class="hidden md:block absolute bottom-0 left-6 w-[340px] h-24 rounded-2xl opacity-20 filter blur-xl bg-linear-to-r from-transparent to-transparent"></div>
-        </div> 
-
-        <div class="relative">
-            <h2 class="text-[22px] md:text-[28px] font-extrabold tracking-tight text-[#003C5D] transform md:-translate-y-3">
-                NUTRITION THAT KNOWS YOU AND ADAPTS, <span class="block">WITHOUT THE GUESSWORK</span>
-            </h2>
-
-            <p class="mt-4 text-[#5B6B79] text-[15px] leading-7 max-w-xl transform md:-translate-y-3">
-                Macros aren’t magic — they’re data. KYTO uses real check-ins and adaptive logic to adjust your nutrition based on how you’re actually progressing. No generic plans. No crash diets. Just smart nutrition, sustainable fat loss or muscle gain.
-            </p>
-
-            <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-lg">
-
-                <div class="flex flex-col items-start text-left gap-2 transform md:-translate-y-6">
-                    <svg class="w-6 h-6 shrink-0" width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-                        <path d="M19 15.4963V3.49634C14.184 8.09034 13.977 11.8153 14 15.4963H19ZM19 15.4963V21.4963H18V18.4963L19 15.4963ZM8 4.49634V21.4963M5 4.49634V7.49634C5 8.29199 5.31607 9.05505 5.87868 9.61766C6.44129 10.1803 7.20435 10.4963 8 10.4963C8.79565 10.4963 9.55871 10.1803 10.1213 9.61766C10.6839 9.05505 11 8.29199 11 7.49634V4.49634" stroke="#FF2E92" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    <div>
-                        <div class="text-sm font-semibold text-[#003C5D]">Personalized for You</div>
-                    </div>
-                </div>
-
-                <div class="flex flex-col items-start text-left gap-2 transform md:-translate-y-6">
-                    <svg class="w-6 h-6 shrink-0" width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-                        <path d="M20 10.4963H4L9.5 4.49634M4 14.4963H20L14.5 20.4963" stroke="#FF2E92" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    <div>
-                        <div class="text-sm font-semibold text-[#003C5D]">Real-Time Swaps</div>
-                    </div>
-                </div>
-
-                <div class="flex flex-col items-start text-left gap-2">
-                    <svg class="w-6 h-6 shrink-0" width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-                        <path d="M15.5 13.4963C14.5717 13.4963 13.6815 13.8651 13.0251 14.5215C12.3687 15.1778 12 16.0681 12 16.9963M12 16.9963V17.9963M12 16.9963C12 16.0681 11.6313 15.1778 10.9749 14.5215C10.3185 13.8651 9.42826 13.4963 8.5 13.4963M12 16.9963V6.99634M12 17.9963C12 18.9246 12.3687 19.8148 13.0251 20.4712C13.6815 21.1276 14.5717 21.4963 15.5 21.4963C16.4283 21.4963 17.3185 21.1276 17.9749 20.4712C18.6313 19.8148 19 18.9246 19 17.9963V16.1963M12 17.9963C12 18.9246 11.6313 19.8148 10.9749 20.4712C10.3185 21.1276 9.42826 21.4963 8.5 21.4963C7.57174 21.4963 6.6815 21.1276 6.02513 20.4712C5.36875 19.8148 5 18.9246 5 17.9963V16.1963M17.5 16.4963C18.4283 16.4963 19.3185 16.1276 19.9749 15.4712C20.6313 14.8148 21 13.9246 21 12.9963C21 12.0681 20.6313 11.1778 19.9749 10.5215C19.3185 9.86509 18.4283 9.49634 17.5 9.49634H17M19 9.79634V6.99634C19 6.06808 18.6313 5.17784 17.9749 4.52146C17.3185 3.86509 16.4283 3.49634 15.5 3.49634C14.5717 3.49634 13.6815 3.86509 13.0251 4.52146C12.3687 5.17784 12 6.06808 12 6.99634M12 6.99634C12 6.06808 11.6313 5.17784 10.9749 4.52146C10.3185 3.86509 9.42826 3.49634 8.5 3.49634C7.57174 3.49634 6.6815 3.86509 6.02513 4.52146C5.36875 5.17784 5 6.06808 5 6.99634V9.79634M6.5 16.4963C5.57174 16.4963 4.6815 16.1276 4.02513 15.4712C3.36875 14.8148 3 13.9246 3 12.9963C3 12.0681 3.36875 11.1778 4.02513 10.5215C4.6815 9.86509 5.57174 9.49634 6.5 9.49634H7" stroke="#FF2E92" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    <div>
-                        <div class="text-sm font-semibold text-[#083A5A]">Adaptive Nutrition</div>
-                    </div>
-                </div>
-
-                <div class="flex flex-col items-start text-left gap-2">
-                    <svg class="w-6 h-6 shrink-0" width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-                        <path d="M21 21.4963L15 15.4963M17 10.4963C17 14.3623 13.866 17.4963 10 17.4963C6.13401 17.4963 3 14.3623 3 10.4963C3 6.63034 6.13401 3.49634 10 3.49634C13.866 3.49634 17 6.63034 17 10.4963Z" stroke="#FF2E92" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    <div>
-                        <div class="text-sm font-semibold text-[##003C5D]">Everything You Need</div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </div>
-</section>      
-<section class="relative overflow-hidden">
-  </section>
-
-<section class="relative bg-gray-50 py-20 md:py-32 overflow-hidden">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 class="text-xl font-extrabold tracking-tight text-[#003C5D]">
-            OUR RESULTS
+      <div class="relative">
+        <h2 class="text-[22px] md:text-[28px] font-extrabold tracking-tight text-[#003C5D] transform md:-translate-y-3">
+          NUTRITION THAT KNOWS YOU AND ADAPTS, <span class="block">WITHOUT THE GUESSWORK</span>
         </h2>
-        <p class="mt-2 text-base text-gray-700">
-            Join 250,000+ people who've changed their bodies and lives with KYTO.
+
+        <p class="mt-4 text-[#5B6B79] text-[15px] leading-7 max-w-xl transform md:-translate-y-3">
+          Macros aren’t magic — they’re data. KYTO uses real check-ins and adaptive logic to adjust your nutrition based on how you’re actually progressing. No generic plans. No crash diets. Just smart nutrition, sustainable fat loss or muscle gain.
         </p>
 
-        <div class="mt-12 flex justify-center flex-col items-center">
-            
-            <img 
-                src="photo_5978857590479767326_w-removebg-preview.png" 
-                alt="250,000+ successful transformations" 
-                class="w-full h-auto object-cover rounded-xl shadow-2xl max-w-5xl ring-4 ring-white" 
-            />
+        <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-lg">
+          <div class="flex flex-col items-start text-left gap-2 transform md:-translate-y-6">
+            <svg class="w-6 h-6 shrink-0" width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+              <path d="M19 15.4963V3.49634C14.184 8.09034 13.977 11.8153 14 15.4963H19ZM19 15.4963V21.4963H18V18.4963L19 15.4963ZM8 4.49634V21.4963M5 4.49634V7.49634C5 8.29199 5.31607 9.05505 5.87868 9.61766C6.44129 10.1803 7.20435 10.4963 8 10.4963C8.79565 10.4963 9.55871 10.1803 10.1213 9.61766C10.6839 9.05505 11 8.29199 11 7.49634V4.49634" stroke="#FF2E92" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <div>
+              <div class="text-sm font-semibold text-[#003C5D]">Personalized for You</div>
+            </div>
+          </div>
+
+          <div class="flex flex-col items-start text-left gap-2 transform md:-translate-y-6">
+            <svg class="w-6 h-6 shrink-0" width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+              <path d="M20 10.4963H4L9.5 4.49634M4 14.4963H20L14.5 20.4963" stroke="#FF2E92" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <div>
+              <div class="text-sm font-semibold text-[#003C5D]">Real-Time Swaps</div>
+            </div>
+          </div>
+
+          <div class="flex flex-col items-start text-left gap-2">
+            <svg class="w-6 h-6 shrink-0" width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+              <path d="M15.5 13.4963C14.5717 13.4963 13.6815 13.8651 13.0251 14.5215C12.3687 15.1778 12 16.0681 12 16.9963M12 16.9963V17.9963M12 16.9963C12 16.0681 11.6313 15.1778 10.9749 14.5215C10.3185 13.8651 9.42826 13.4963 8.5 13.4963M12 16.9963V6.99634M12 17.9963C12 18.9246 12.3687 19.8148 13.0251 20.4712C13.6815 21.1276 14.5717 21.4963 15.5 21.4963C16.4283 21.4963 17.3185 21.1276 17.9749 20.4712C18.6313 19.8148 19 18.9246 19 17.9963V16.1963M12 17.9963C12 18.9246 11.6313 19.8148 10.9749 20.4712C10.3185 21.1276 9.42826 21.4963 8.5 21.4963C7.57174 21.4963 6.6815 21.1276 6.02513 20.4712C5.36875 19.8148 5 18.9246 5 17.9963V16.1963M17.5 16.4963C18.4283 16.4963 19.3185 16.1276 19.9749 15.4712C20.6313 14.8148 21 13.9246 21 12.9963C21 12.0681 20.6313 11.1778 19.9749 10.5215C19.3185 9.86509 18.4283 9.49634 17.5 9.49634H17M19 9.79634V6.99634C19 6.06808 18.6313 5.17784 17.9749 4.52146C17.3185 3.86509 16.4283 3.49634 15.5 3.49634C14.5717 3.49634 13.6815 3.86509 13.0251 4.52146C12.3687 5.17784 12 6.06808 12 6.99634M12 6.99634C12 6.06808 11.6313 5.17784 10.9749 4.52146C10.3185 3.86509 9.42826 3.49634 8.5 3.49634C7.57174 3.49634 6.6815 3.86509 6.02513 4.52146C5.36875 5.17784 5 6.06808 5 6.99634V9.79634M6.5 16.4963C5.57174 16.4963 4.6815 16.1276 4.02513 15.4712C3.36875 14.8148 3 13.9246 3 12.9963C3 12.0681 3.36875 11.1778 4.02513 10.5215C4.6815 9.86509 5.57174 9.49634 6.5 9.49634H7" stroke="#FF2E92" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <div>
+              <div class="text-sm font-semibold text-[#083A5A]">Adaptive Nutrition</div>
+            </div>
+          </div>
+
+          <div class="flex flex-col items-start text-left gap-2">
+            <svg class="w-6 h-6 shrink-0" width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+              <path d="M21 21.4963L15 15.4963M17 10.4963C17 14.3623 13.866 17.4963 10 17.4963C6.13401 17.4963 3 14.3623 3 10.4963C3 6.63034 6.13401 3.49634 10 3.49634C13.866 3.49634 17 6.63034 17 10.4963Z" stroke="#FF2E92" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <div>
+              <div class="text-sm font-semibold text-[##003C5D]">Everything You Need</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
     </div>
-
-
-<section class="relative bg-[linear-gradient(180deg,#eaf6fb,white)]">
-  </section>
-    </main>
-<section class="relative bg-[linear-gradient(180deg,#eaf6fb,white)]">
 </section>
+
+<!-- Carousel: جایگزین کنید image-1.jpg ... image-7.jpg با تصاویر شما -->
+ <!-- Title above carousel (added) -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-6">
+  <h3 class="text-xl font-extrabold tracking-tight text-[#003C5D]">OUR RESULTS</h3>
+  <p class="mt-2 text-base text-gray-700">Join 250,000+ people who've changed their bodies and lives with KYTO.</p>
+</div>
+<!-- Caption below carousel (added) -->
+
+<section id="results-carousel" class="carousel" aria-label="Rotating gallery of 7 transformations">
+  <div class="carousel-track" role="list">
+    <div class="carousel-item" role="listitem">
+      <img src="803a61fe14207263a9be54efbb332d49f1684677.png" alt="Result 1">
+    </div>
+    <div class="carousel-item" role="listitem">
+      <img src="ea29a0ec9cc5340a42841ea5d3124b499ad93e1e.png" alt="Result 2">
+    </div>
+    <div class="carousel-item center" role="listitem">
+      <img src="ff938d54557a8929e038de7c65d2990f556f7535.png" alt="Result 3 (featured)">
+    </div>
+    <div class="carousel-item" role="listitem">
+      <img src="47960672fd780d537c35b6d9610f5c14f135017d.png" alt="Result 4">
+    </div>
+    <div class="carousel-item" role="listitem">
+      <img src="679747a8fd338415050fc49682a6b8d0325d82a5.png" alt="Result 5">
+    </div>
+    <div class="carousel-item" role="listitem">
+      <img src="ad879769b7d798cb092f75cc654bf3aaa894c76e.png" alt="Result 6">
+    </div>
+    <div class="carousel-item" role="listitem">
+      <img src="ea29a0ec9cc5340a42841ea5d3124b499ad93e1e.png" alt="Result 7">
+    </div>
+  </div>
+
+  <!-- اختیاری: دات‌های ناوبری -->
+  <div class="carousel-dots" role="tablist" aria-label="Slides navigation">
+    <button class="dot" data-index="0" aria-label="Slide 1"></button>
+    <button class="dot" data-index="1" aria-label="Slide 2"></button>
+    <button class="dot" data-index="2" aria-label="Slide 3"></button>
+    <button class="dot" data-index="3" aria-label="Slide 4"></button>
+    <button class="dot" data-index="4" aria-label="Slide 5"></button>
+    <button class="dot" data-index="5" aria-label="Slide 6"></button>
+    <button class="dot" data-index="6" aria-label="Slide 7"></button>
+  </div>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center mt-6">
+  <div class="blue-outline">
+    <p class="blue-outline__text">This happened because of you ❤️</p>
+  </div>
+</div>
+</section>
+
+<style>
+/* پایه و تنظیمات ظرف */
+.carousel {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 48px 16px;
+  box-sizing: border-box;
+  position: relative;
+  overflow: visible;
+  background: linear-gradient(180deg,#eaf6fb,white);
+  border-radius: 16px;
+}
+
+/* Soft blue outline using #D8E8F2 */
+.blue-outline{
+  display: inline-block;
+  position: relative;
+  border-radius: 14px;
+  padding: 10px 18px;
+  background: #ffffff;
+  z-index: 1;
+  margin-top: 20px;
+}
+
+/* Outer soft glow / shape using pseudo-element */
+.blue-outline::before{
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: 18px;
+  background: #D8E8F2;
+  filter: blur(8px);
+  opacity: 0.95;
+  z-index: -1;
+}
+
+/* Optional subtle inner border for definition */
+.blue-outline::after{
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 15px;
+  box-shadow: 0 0 0 1px rgba(216,232,242,0.8) inset;
+  pointer-events: none;
+  z-index: -0;
+}
+
+/* Text styling */
+.blue-outline__text{
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #083A5A;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* Responsive wrap on small screens */
+@media (max-width:420px){
+  .blue-outline{ padding: 8px 12px; }
+  .blue-outline__text{ white-space: normal; font-size: 1rem; }
+}
+/* ردیف تصاویر (نه overflow:hidden تا تصویر وسط بزرگ بیرون نزند) */
+.carousel-track {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  transform-origin: center center;
+  will-change: transform;
+  transition: transform 700ms cubic-bezier(.22,.9,.28,1);
+  padding: 12px 6px;
+}
+
+/* آیتم پایه */
+.carousel-item {
+  flex: 0 0 auto;
+  width: 14%; /* پایه برای دسکتاپ؛ تنظیم می‌شود */
+  max-width: 180px;
+  min-width: 110px;
+  box-sizing: border-box;
+  transition: transform 700ms cubic-bezier(.22,.9,.28,1), opacity 500ms ease;
+  opacity: 0.6;
+  filter: saturate(0.9) contrast(0.98);
+  transform-origin: center center;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 8px 30px rgba(8,16,30,0.08);
+  overflow: hidden;
+}
+
+/* تصویر درون آیتم */
+.carousel-item img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  vertical-align: middle;
+}
+
+/* آیتم مرکزی بزرگ و برجسته */
+.carousel-item.center {
+  transform: scale(1.35) translateY(-8px);
+  z-index: 5;
+  opacity: 1;
+  filter: none;
+  box-shadow: 0 18px 50px rgba(8,16,30,0.18);
+}
+
+/* آیتم‌های کنار مرکز کمی برجسته‌تر از بقیه */
+.carousel-item.adj {
+  transform: scale(1.08);
+  z-index: 3;
+  opacity: 0.9;
+}
+
+/* دات‌ها */
+.carousel-dots {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 20px;
+}
+.carousel-dots .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(0,60,93,0.14);
+  border: none;
+  cursor: pointer;
+  transition: transform 180ms ease, background 180ms ease;
+}
+.carousel-dots .dot[aria-pressed="true"]{
+  background: #003C5D;
+  transform: scale(1.25);
+  box-shadow: 0 6px 18px rgba(0,60,93,0.18);
+}
+
+/* رفتار hover/focus برای توقف اتومات */
+.carousel:focus-within, .carousel:hover {
+  outline: none;
+}
+
+/* Responsive: تنظیم برای تبلت (حداکثر تغییرات فقط در تبلت) */
+/* شما خواسته بود فقط تبلت را تغییر دهد؛ بنابراین این بلوک برای عرض 768–991px است */
+@media (min-width: 768px) and (max-width: 991px) {
+  .carousel { padding: 36px 10px; }
+  .carousel-track { gap: 14px; }
+  .carousel-item { width: 16%; max-width: 200px; min-width: 120px; }
+  .carousel-item.center { transform: scale(1.5) translateY(-12px); }
+  .carousel-item.adj { transform: scale(1.12); }
+}
+
+/* موبایل: بدون تغییر ظاهری عمده (تنها برای قابل استفاده بودن) */
+@media (max-width: 767px) {
+  .carousel-track { gap: 12px; }
+  .carousel-item { width: 36%; max-width: 260px; min-width: 140px; opacity: 0.9; }
+  .carousel-item.center { transform: scale(1.08) translateY(-6px); }
+}
+
+/* دسکتاپ بزرگتر */
+@media (min-width: 1200px) {
+  .carousel-item { width: 12%; max-width: 210px; min-width: 120px; }
+  .carousel-item.center { transform: scale(1.45) translateY(-10px); }
+}
+</style>
+
+<script>
+/*
+  رفتار اسلایدر:
+  - نمایش 7 آیتم در DOM (ثابت)
+  - متد: هر دور، کلاس center به آیتم بعدی می‌رود
+  - زمان‌بندی: intervalMs (قابل تغییر)
+  - توقف وقتی ماوس یا تمرکز روی اسلایدر است
+  - دات‌ها برای پرش به اسلاید دلخواه
+*/
+(function () {
+  const carousel = document.getElementById('results-carousel');
+  if (!carousel) return;
+
+  const track = carousel.querySelector('.carousel-track');
+  const items = Array.from(track.querySelectorAll('.carousel-item'));
+  const dots = Array.from(carousel.querySelectorAll('.dot'));
+  const total = items.length;
+  let centerIndex = Math.floor(total / 2); // شروع: آیتم وسطی پیش‌فرض (index 3 برای 7 آیتم)
+  const intervalMs = 3500;
+  let timer = null;
+  let isPaused = false;
+
+  // Helper: apply classes based on centerIndex
+  function applyPositions() {
+    items.forEach((it, i) => {
+      it.classList.remove('center', 'adj');
+      // محاسبه فاصله از مرکز به صورت حلقه‌ای
+      const dist = Math.min(
+        Math.abs(i - centerIndex),
+        total - Math.abs(i - centerIndex)
+      );
+      if (dist === 0) {
+        it.classList.add('center');
+      } else if (dist === 1) {
+        it.classList.add('adj');
+      }
+    });
+
+    // دات‌ها
+    if (dots.length) {
+      dots.forEach(d => d.setAttribute('aria-pressed', 'false'));
+      const visualIndex = centerIndex % total;
+      const normalized = (visualIndex + total) % total;
+      dots[normalized].setAttribute('aria-pressed', 'true');
+    }
+
+    // افکت جابجایی تراک: به گونه‌ای جابجا می‌کنیم که آیتم‌ها همیشه در مرکز بصری قرار بگیرند
+    // محاسبه ترانسفرم افقی بر اساس عرض عناصر
+    // این یک تقریب دینامیک است که روی اکثر اندازه‌ها خوب کار می‌کند
+    const widths = items.map(it => it.getBoundingClientRect().width);
+    const containerWidth = carousel.getBoundingClientRect().width;
+    // فاصله کلی قبل از مرکز را محاسبه کن
+    let offset = 0;
+    for (let i = 0; i < centerIndex; i++) offset += widths[i] + parseFloat(getComputedStyle(track).gap || 18);
+    // مرکز آیتم انتخاب شده
+    const centerItemWidth = widths[centerIndex];
+    const translateX = (containerWidth / 2) - (offset + centerItemWidth / 2);
+    track.style.transform = `translateX(${translateX}px)`;
+  }
+
+  // حرکت به آیتم بعدی
+  function next() {
+    centerIndex = (centerIndex + 1) % total;
+    applyPositions();
+  }
+
+  // حرکت به آیتم خاص
+  function goTo(index) {
+    centerIndex = ((index % total) + total) % total;
+    applyPositions();
+  }
+
+  // تایمر خودکار
+  function startAuto() {
+    if (timer) clearInterval(timer);
+    timer = setInterval(() => {
+      if (!isPaused) next();
+    }, intervalMs);
+  }
+  function stopAuto() {
+    if (timer) { clearInterval(timer); timer = null; }
+  }
+
+  // وقایع توقف/راه‌اندازی
+  carousel.addEventListener('mouseenter', () => { isPaused = true; });
+  carousel.addEventListener('mouseleave', () => { isPaused = false; });
+  carousel.addEventListener('focusin', () => { isPaused = true; });
+  carousel.addEventListener('focusout', () => { isPaused = false; });
+
+  // دات‌ها
+  dots.forEach(d => {
+    d.addEventListener('click', (e) => {
+      const idx = parseInt(e.currentTarget.getAttribute('data-index'), 10);
+      goTo(idx);
+      // نوبت خودکار ریست شود تا کاربر فرصت کند
+      startAuto();
+    });
+  });
+
+  // کلیدهای کیبورد (فلش چپ/راست) برای ناوبری
+  carousel.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') { next(); startAuto(); }
+    if (e.key === 'ArrowLeft') { centerIndex = (centerIndex - 1 + total) % total; applyPositions(); startAuto(); }
+  });
+
+  // موقع بارگذاری اولیه و در تغییر اندازه اعمال کن
+  window.addEventListener('load', () => { applyPositions(); startAuto(); });
+  window.addEventListener('resize', () => { applyPositions(); });
+
+  // اعمال اولیه سریع
+  applyPositions();
+  startAuto();
+})();
+</script>
+
 
 <main>
   <!-- ===== نسخه دسکتاپ (اصلی شما) ===== -->
-  <<!-- ===== نسخه دسکتاپ ===== -->
+  <!-- ===== نسخه دسکتاپ ===== -->
 <section class="relative pb-16 px-4 sm:px-6 lg:px-8 bg-white hidden lg:block">
-  <div class="max-w-7xl mx-auto"> 
-    <div 
-      class="relative overflow-hidden rounded-2xl shadow-2xl p-6 md:p-12 lg:p-16 flex flex-col items-start justify-center text-center md:text-left h-[500px]" 
-    >
-      <img
-        src="photo_5978857590479767459_w.jpg" 
-        alt="Fitness transformation coaches"
-        class="absolute inset-0 w-full h-full object-cover select-none pointer-events-none rounded-2xl"
-      />
-      <div class="w-full max-w-2xl text-white z-10 md:ml-0">
-        <!-- محتوای دسکتاپ -->
-      </div>
+    <div class="hero-section">
+        <div class="content-overlay">
+            <h1>WANT REAL FITNESS COACHING THAT ADAPTS WITH YOU AND ACTUALLY GETS RESULTS?</h1>
+            <p>Join 250,000+ people who've transformed with expert-led strength training and adaptive nutrition. Take the 2 min quiz now</p>
+            <button class="cta-button">START MY TRANSFORMATION</button>
+        </div>
     </div>
-  </div>
 </section>
+<style>
+/* Container */
+.hero-section {
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+  border-radius: 25px;
+  overflow: hidden;
+  position: relative;
+  background-image: url('f171232096503f1e027e176b67c23a9896fd01fa (1).jpg'); /* use optimized path and optimized image */
+  background-size: 130%;
+  background-position: right center;
+  background-repeat: no-repeat;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  transition: background-size 300ms ease, background-position 300ms ease;
+  min-height: 420px; /* flexible baseline */
+  padding: 40px; /* prevents content touching edges on very wide viewports */
+  height: 600px;
+}
 
+/* dim overlay for better contrast */
+.hero-section::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Content block sits above overlay */
+.content-overlay{
+  position: relative;
+  z-index: 2;
+  width: 45%;
+  padding: 40px 50px;
+  box-sizing: border-box;
+  color: #ffffff;
+  text-align: left;
+}
+
+/* Headings and paragraph */
+.content-overlay h1,
+.content-overlay p{
+  margin: 0 0 20px 0;
+  line-height: 1.3;
+  text-shadow: none;
+}
+
+/* Stronger, clearer title */
+.content-overlay h1{
+  font-size: clamp(0.95rem, 1.3vw, 1.3rem);
+  font-weight: 800;
+  line-height: 1.40;
+  margin-bottom: 14px;
+}
+
+/* Body copy */
+.content-overlay p{
+  font-size: clamp(1rem, 1.4vw, 1.1rem);
+  line-height: 1.6;
+  margin-bottom: 28px;
+  opacity: 0.95;
+}
+
+/* CTA styling with focus state */
+.cta-button{
+  background-color: #ff1493;
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  padding: 14px 30px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+  display: inline-block;
+  text-decoration: none;
+  outline: none;
+  margin-left: 40px;
+}
+
+.cta-button:hover{ 
+  background-color: #e01281;
+  transform: translateY(-3px);
+}
+
+.cta-button:focus{
+  box-shadow: 0 0 0 4px rgba(255,20,147,0.18);
+  border: 2px solid rgba(255,255,255,0.06);
+}
+
+/* Ensure sufficient contrast for small text elements */
+.content-overlay .muted{
+  color: rgba(255,255,255,0.9);
+  font-size: 0.95rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px){
+  .hero-section{
+    min-height: 520px;
+    background-position: center center;
+    background-size: cover;
+    justify-content: center;
+    padding: 48px 20px;
+  }
+
+  .content-overlay{
+    width: 100%;
+    padding: 0 12px;
+    text-align: center;
+  }
+
+  .content-overlay h1{
+    margin-bottom: 14px;
+  }
+
+  .cta-button{
+    padding: 14px 26px;
+    width: auto;
+  }
+}
+
+/* Tweak for very small screens */
+@media (max-width: 480px){
+  .hero-section{ padding: 36px 12px; min-height: 480px; }
+  .content-overlay h1{ font-size: 1.4rem; }
+}
+
+</style>
 <!-- ===== نسخه تبلت ===== -->
 <section class="relative pb-12 px-4 sm:px-6 bg-white hidden md:block lg:hidden">
   <div class="max-w-3xl mx-auto"> 
