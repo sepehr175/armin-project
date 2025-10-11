@@ -193,7 +193,7 @@
 </style>
   </head>
 
-  <body class="bg-gray-50 min-h-screen">
+<body class="bg-gray-50 min-h-screen flex flex-col">
    <!-- DESKTOP HEADER: دقیقاً همونی که می‌خوای — بدون تغییر -->
 <!-- ---------- Header (desktop + mobile/tablet) ---------- -->
 <header class="desktop-header bg-white shadow-xs hidden md:block">
@@ -249,7 +249,7 @@
     </div>
   </div>
 </header>
-
+  <main class="flex-grow">
 <!-- ---------- Tablet-specific CSS + small helpers ---------- -->
 <style>
   /* ===================================================================
@@ -346,7 +346,7 @@
 </script>
 
 
-    <main>
+
 <section
   class="relative w-full h-screen flex items-center justify-start px-6 pt-16 pb-0 overflow-hidden"
   style="background: #f7f7f7;"
@@ -395,18 +395,25 @@
 <style>
 /* ===== Mobile-only: center hero image under the text (no desktop changes) ===== */
 /* === فقط موبایل: جایگزین بلوک موبایل فعلی کن === */
+/* ===== Mobile-only: center hero image under the text (no desktop changes) ===== */
+/* === فقط موبایل: جایگزین بلوک موبایل فعلی کن === */
 @media (max-width: 767px) {
-  /* Section: اجازه بده قد بخش به محتوای موبایل منطبق شود */
+  /* Section: تنظیم والد اصلی برای لغو هرگونه padding یا max-width در موبایل */
   section[style*="background: #f7f7f7"] {
     min-height: auto !important;
     height: auto !important;
     padding-bottom: 2rem !important;
-    overflow: visible !important;
+    overflow: hidden !important; /* overflow-x را مخفی می‌کند */
 
-    /* عکس داخل همین سِکشن به صورت ستک‌شده نمایش داده می‌شود:
-       ما از order استفاده می‌کنیم تا تصویر بعد از محتوای متنی قرار بگیرد. */
+    /* اطمینان از اینکه والد اصلی padding افقی نداشته باشد */
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    
+    /* عکس داخل همین سِکشن به صورت ستک‌شده نمایش داده می‌شود: */
     display: flex !important;
     flex-direction: column !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   /* گرادینت سفید پشت متن — فقط بالای سِکشن باشد */
@@ -415,29 +422,31 @@
     left: 0 !important;
     top: 0 !important;
     width: 100% !important;
-    height: 48% !important; /* قابل تنظیم (کم = کوتاه‌تر) */
+    height: 48% !important;
     background: linear-gradient(180deg,#ffffff 0%, rgba(255,255,255,0.95) 65%, transparent 100%) !important;
     z-index: 0 !important;
     pointer-events: none !important;
   }
 
-  /* متن‌ها همیشه بالای تصویر بمانند و در سمت چپ قرار گیرند */
-@media (max-width: 767px) {
   /* مرکز کردن قطعی محتوای متنی و دکمه داخل سِکشن مورد نظر */
   section[style*="background: #f7f7f7"] > .relative.z-20.max-w-2xl.flex.flex-col,
   section[style*="background: #f7f7f7"] .hero-content {
     display: flex !important;
     flex-direction: column !important;
-    align-items: center !important;    /* وسط‌چین افقی محتوای داخل باکس */
+    align-items: center !important;
     justify-content: center !important;
-    text-align: center !important;     /* متن‌ها وسط شوند */
+    text-align: center !important;
     margin-left: auto !important;
     margin-right: auto !important;
-    padding-left: 1rem !important;
+    
+    /* بازگرداندن پدینگ داخلی برای محتوای متنی، تا به لبه نچسبد */
+    padding-left: 1rem !important; 
     padding-right: 1rem !important;
+    
     width: 100% !important;
-    max-width: 720px !important;       /* براساس نیاز کم/زیاد کن */
+    max-width: 720px !important;
     box-sizing: border-box !important;
+    z-index: 20 !important;
   }
 
   /* اگر عناصر داخلی (h1, p, div...) کلاس‌های margin از قبل دارند، پاک‌شان کن */
@@ -447,7 +456,7 @@
     text-align: center !important;
   }
 
-  /* دکمه دقیقاً در مرکز قرار می‌گیرد */
+  /* دکمه */
   section[style*="background: #f7f7f7"] .hero-content button,
   section[style*="background: #f7f7f7"] .hero-content .btn {
     display: inline-block !important;
@@ -455,25 +464,24 @@
     float: none !important;
   }
 
-  /* در صورت وجود کلاس‌هایی که padding/translate ایجاد می‌کنند، آن‌ها را لغو کن */
+  /* لغو مارجین‌های مربوط به Tailwind */
   section[style*="background: #f7f7f7"] .ml-0,
   section[style*="background: #f7f7f7"] .md\\:ml-12,
   section[style*="background: #f7f7f7"] .lg\\:ml-20 {
     margin-left: 0 !important;
   }
-}
+
   section[style*="background: #f7f7f7"] > div.relative.z-20.max-w-2xl.flex.flex-col.items-start.space-y-6.ml-0 button.mt-4 {
     display: block !important;
     width: 100% !important;
     max-width: none !important;
-    box-sizing: border-box !important; /* padding در عرض محاسبه شود */
-    margin: 16px 0 0 !important;        /* فاصله از بالا */
+    box-sizing: border-box !important;
+    margin: 16px 0 0 !important;
     float: none !important;
     text-align: center !important;
   }
-  /* تصویر: مرکز، زیر دکمه/متن، اندازهٔ ثابت نزدیک به نمونه */
-/* جایگزین برای بلوک .hero-img در @media (max-width: 767px) */
-@media (max-width: 767px) {
+
+  /* تصویر: تنظیمات تمام صفحه شدن */
   .hero-img {
     /* حذف کادر و سایه */
     background: transparent !important;
@@ -481,31 +489,39 @@
     border-radius: 0 !important;
     box-shadow: none !important;
 
-    /* موقعیت و اندازه: بعد از متن قرار می‌گیرد و بدون قاب باشد */
+    /* موقعیت و اندازه */
     position: relative !important;
     display: block !important;
     order: 2 !important;
     align-self: center !important;
-
-    /* اندازهٔ قابل تنظیم؛ برای نمایش بدون کادر بهتر است عرض کامل قابل‌اعتماد باشد */
-    width: calc(100% - 0px) !important; /* اگر می‌خواهی کمی فاصله کناری داشته باشد از calc(100% - 32px) */
-    max-width: 900px !important;
-    height: 400px !important;
-    margin: 18px auto 28px !important;
-
-    /* نمایش عکس دقیق و بدون بریدگی ناخواسته */
-    object-fit: cover !important;        /* یا contain اگر نمی‌خواهی هیچ بخشی Crop شود */
-    object-position: 70% 30% !important; /* نگهدار موقعیت سوژه مثل دسکتاپ */
+    
+    /* ------------------------------------------------------------------- */
+    /* **تنظیمات برای تمام صفحه شدن (Full-Width) در موبایل:** */
+    width: 100vw !important;        /* عرض صد درصد viewport (کل صفحه) */
+    max-width: none !important;
+    min-width: 100vw !important;
+    height: 400px !important;      
+    
+    /* حاشیه‌های افقی را کاملاً حذف می‌کند */
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    margin-top: 18px !important;
+    margin-bottom: 28px !important;
+    
+    /* موقعیت را به سمت چپ صفحه می‌کشد تا 100vw درست عمل کند */
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    
+    /* نمایش عکس */
+    object-fit: cover !important; 
+    object-position: 70% 30% !important; 
+    
     top: auto !important;
-    left: auto !important;
     right: auto !important;
     bottom: auto !important;
-    transform: none !important;
 
     z-index: 10 !important;
     pointer-events: none !important;
-    min-width: 0 !important;
-    max-width: 86% !important; /* در موبایل‌های خیلی کوچک اندازه را محدود می‌کند */
   }
 
   /* اگر قبلاً روی والد .feature-figure یا مشابه، بک‌گراند سفید یا padding گذاشته شده بود */
@@ -516,12 +532,15 @@
     box-shadow: none !important;
     border-radius: 0 !important;
   }
-}
 
   /* جلوگیری از اسکرول افقی غیرمنتظره */
-  html, body { margin: 0 !important; padding: 0 !important; overflow-x: hidden !important; }
+  html, body { 
+    margin: 0 !important; 
+    padding: 0 !important; 
+    overflow-x: hidden !important; /* مهم: برای جلوگیری از اسکرول افقی */
+    width: 100% !important;
+  }
 }
-
 
 </style>
 
@@ -931,6 +950,39 @@
     margin: 0 !important;
     padding: 0 !important;
   }
+}
+/* ===== روش پیشنهادی: گرادیانت پشت تصویر با pseudo-element ===== */
+.section-grid .feature-figure {
+  position: relative !important; /* والد باید relative باشه برای قرارگیری پس‌زمینه */
+  overflow: visible !important;
+}
+
+/* لایه گرادیانت پشت تصویر */
+.section-grid .feature-figure::before {
+  content: "" ;
+  position: absolute;
+  z-index: 1; /* زیر تصویر */
+  inset: 0; /* به اندازه والد */
+  left: 6% !important; /* کمی از چپ فاصله بده؛ عدد را برحسب نیاز تنظیم کن */
+  right: 6% !important; /* فضای کناری */
+  top: 6% !important;
+  bottom: 6% !important;
+  border-radius: 12px !important; /* گوشه گرد */
+  pointer-events: none !important;
+  /* گرادیانت قابل تنظیم: رنگ‌ها را اگر خواستی عوض کن */
+  background: linear-gradient(135deg,
+              rgba(19, 132, 255, 0.14) 0%,
+              rgba(139, 92, 246, 0.10) 45%,
+              rgba(255, 99, 132, 0.08) 100%) !important;
+  filter: blur(14px) !important; /* نرمی و محو بودن */
+  transform: scale(1.02) !important; /* کمی بزرگ‌تر تا از کناره‌ها دیده بشه */
+}
+
+/* تصویر همیشه یک لایه جلوتر باشه */
+.section-grid .feature-figure .figure-img {
+  position: relative !important;
+  z-index: 2 !important;
+  border-radius: 10px !important; /* تا مطابق با پس‌زمینه بشه */
 }
 
 </style>
@@ -1415,7 +1467,7 @@
 </script>
 
 
-<main>
+
   <!-- ===== نسخه دسکتاپ (اصلی شما) ===== -->
   <!-- ===== نسخه دسکتاپ ===== -->
 <section class="relative pb-16 px-4 sm:px-6 lg:px-8 bg-white hidden lg:block">
@@ -1559,45 +1611,285 @@
   .hero-section{ padding: 36px 12px; min-height: 480px; }
   .content-overlay h1{ font-size: 1.4rem; }
 }
+/* 1 — اطمینان از اینکه هیرو حوزه‌ای برای محتوای نسبی دارد (در صورت نیاز) */
+.hero-section,
+section.relative.w-full { /* یا سلکتور دقیق‌تر خودت */
+  position: relative; /* قبلاً هم داشتید اما ذکر می‌کنم */
+  z-index: 1;          /* فوتر بالاتر یا پایین‌تر را با این هماهنگ می‌کنیم */
+}
+
+/* 2 — اگر فوتر fixed/absolute است، فضای پایینی اضافه کن */
+main, .page-content { /* سلکتور کانتینر اصلی صفحه که فوتر را دنبال می‌کند */
+  padding-bottom: 120px; /* حداقل ارتفاع فوتر + فاصله؛ مقدار را با ارتفاع فوتر تنظیم کن */
+}
+
+/* 3 — اگر فوتر position: fixed دارد و می‌خواهی همیشه بالای فوتر باشه */
+footer {
+  position: relative; /* اگر امکان‌پذیر نیست، حداقل z-index را تنظیم کن */
+  z-index: 10;
+}
+
+/* 4 — تضمین اینکه محتوا (مخصوصا تصویر absolute) فضای والد را خراب نکند */
+.hero-section .content-overlay {
+  position: relative;
+  z-index: 2;
+}
+
+/* 5 — گزینه جایگزین: اگر می‌خواهی فوتر همیشه در پایین صفحه ظاهر شود بدون پوشش دادن محتوای کوتاه */
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+main {
+  flex: 1 0 auto;
+}
+footer {
+  flex-shrink: 0;
+}
 
 </style>
-<!-- ===== نسخه تبلت ===== -->
+<!-- ===== نسخه تبلت (نمایش تنها در md و نه در lg) ===== -->
 <section class="relative pb-12 px-4 sm:px-6 bg-white hidden md:block lg:hidden">
-  <div class="max-w-3xl mx-auto"> 
-    <div 
-      class="relative overflow-hidden rounded-2xl shadow-xl p-8 flex flex-col items-center justify-center text-center h-[300px]" 
-    >
-      <img
-        src="photo_5978857590479767459_w.jpg"
-        alt="Fitness tablet version"
-        class="absolute inset-0 w-full h-full object-cover select-none pointer-events-none rounded-2xl"
-      />
-      <div class="relative z-10 text-white">
-        <!-- محتوای تبلت -->
+  <div class="max-w-3xl mx-auto">
+    <div class="hero-section-tablet">
+      <div class="content-overlay-tablet">
+        <h1>WANT REAL FITNESS COACHING THAT ADAPTS WITH YOU AND ACTUALLY GETS RESULTS?</h1>
+        <p>Join 250,000+ people who've transformed with expert-led strength training and adaptive nutrition. Take the 2 min quiz now</p>
+        <button class="cta-button-tablet">START MY TRANSFORMATION</button>
       </div>
     </div>
   </div>
 </section>
+
+<style>
+/* پایه (نسخه تبلت از hero-section) */
+.hero-section-tablet {
+  width: 100%;
+  max-width: 1100px;              /* کوچک‌تر از دسکتاپ برای تبلت */
+  margin: 0 auto;
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+  background-image: url('f171232096503f1e027e176b67c23a9896fd01fa (1).jpg');
+  background-size: 190% !important;
+  background-position: right center;
+  background-repeat: no-repeat;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  transition: background-size 300ms ease, background-position 300ms ease;
+  min-height: 360px;              /* ارتفاع مناسب تبلت */
+  padding: 28px;                  /* فاصله داخلی مناسب */
+  box-shadow: 0 12px 30px rgba(6,30,50,0.08);
+  height: 780px;
+}
+
+/* نیمه‌ی تار (overlay) اگر خواستی تیره‌اش کنی */
+.hero-section-tablet::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0.12));
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* کانتینتِ روی تصویر */
+.content-overlay-tablet{
+  position: relative;
+  z-index: 2;
+  width: 52%;                      /* اندکی بزرگتر نسبت به دسکتاپ برای تبلت */
+  padding: 20px 26px;
+  box-sizing: border-box;
+  color: #ffffff;
+  text-align: left;
+}
+
+/* تیتر و پاراگراف */
+.content-overlay-tablet h1,
+.content-overlay-tablet p{
+  margin: 0 0 14px 0;
+  line-height: 1.28;
+  text-shadow: none;
+}
+
+/* تیتر */
+.content-overlay-tablet h1{
+  font-size: 2.55rem;              /* مناسب برای تبلت */
+  font-weight: 800;
+  line-height: 1.28;
+  margin-top: -390px;
+  color: #ffffff;
+}
+
+/* پاراگراف */
+.content-overlay-tablet p{
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-top: 0px;
+  opacity: 0.95;
+  color: rgba(255,255,255,0.95);
+}
+
+/* دکمه CTA نسخه تبلت */
+.cta-button-tablet{
+  background-color: #ff1493;
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  padding: 12px 26px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+  display: inline-block;
+  text-decoration: none;
+  outline: none;
+}
+
+/* حالت ها */
+.cta-button-tablet:hover{
+  background-color: #e01281;
+  transform: translateY(-3px);
+}
+.cta-button-tablet:focus{
+  box-shadow: 0 0 0 4px rgba(255,20,147,0.18);
+  border: 2px solid rgba(255,255,255,0.06);
+}
+
+/* اطمینان از ترتیب لایه‌ها */
+.hero-section-tablet .content-overlay-tablet { z-index: 2; position: relative; }
+
+/* تنظیمات بیشتر برای بازه‌ی متوسط تبلت (حد فاصل md) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .hero-section-tablet {
+    background-position: center right;
+    background-size: cover;
+    min-height: 420px;           /* اگر می‌خواهی کمی بلندتر باشه */
+    padding: 36px;
+  }
+  .content-overlay-tablet {
+    width: 56%;
+    padding: 18px 22px;
+    text-align: left;
+  }
+  .content-overlay-tablet h1 {
+    font-size: 1.15rem;
+  }
+  .content-overlay-tablet p {
+    font-size: 1rem;
+  }
+}
+
+/* سازگاری با تبلت‌های خیلی باریک (قابلیت نمایش خوب) */
+@media (min-width: 768px) and (max-width: 900px) {
+  .content-overlay-tablet {
+    width: 62%;
+  }
+  .hero-section-tablet {
+    background-position: center;
+    background-size: 140%;
+  }
+}
+
+/* اگر تمایل داری متن وسط قرار بگیرد در تبلت‌های کوچک‌تر */
+@media (min-width: 768px) and (max-width: 850px) {
+  .content-overlay-tablet { text-align: center; width: 100%; }
+  .hero-section-tablet { justify-content: center; }
+  .content-overlay-tablet h1 { font-size: 1.05rem; }
+}
+</style>
 
 <!-- ===== نسخه موبایل ===== -->
-<section class="relative pb-12 px-4 sm:px-6 bg-white block md:hidden">
-  <div class="max-w-md mx-auto"> 
-    <div 
-      class="relative overflow-hidden rounded-xl shadow-xl p-6 flex flex-col items-center justify-center text-center h-[150px]" 
-    >
-      <img
-        src="photo_5978857590479767459_w.jpg"
-        alt="Fitness mobile version"
-        class="absolute inset-0 w-full h-full object-cover select-none pointer-events-none rounded-xl"
-      />
-      <div class="relative z-10 text-white">
-        <!-- محتوای موبایل -->
+<section class="relative w-full block md:hidden">
+  <div class="relative w-full h-[896px] overflow-hidden">
+
+    <!-- Background (zoomed + positioned) behind content -->
+    <img
+      src="f171232096503f1e027e176b67c23a9896fd01fa (1).jpg"
+      alt="Fitness Background"
+      class="absolute inset-0 w-full h-full object-cover transform scale-[1.25]"
+      style="object-position: center 65px;"
+    />
+
+    <!-- Overlay for contrast -->
+    <div class="absolute inset-0 bg-gradient-to-b from-[rgba(0,0,0,0.58)] via-[rgba(0,0,0,0.28)] to-transparent"></div>
+
+    <!-- Content wrapper: متن‌ها و دکمه در جریان (static / relative) تا دکمه دقیقاً زیر متن قرار بگیرد -->
+    <div class="relative z-20 w-full max-w-xl mx-auto px-6 pt-6 h-full text-center text-white">
+      <!-- بالای کانتینر: عنوان و متن (در جریان سند) -->
+      <div class="mx-auto max-w-2xl">
+        <h1 class="text-2xl font-extrabold leading-[1.18] tracking-tight -mt-5">
+          WANT REAL FITNESS COACHING THAT ADAPTS WITH YOU AND ACTUALLY GETS RESULTS?
+        </h1>
+
+        <p class="mt-3 text-[0.98rem] leading-6 font-medium">
+          Join 250,000+ people who've transformed with expert-led strength training and adaptive nutrition. Take the 2 min quiz now
+        </p>
+
+        <!-- دکمه دقیقا بعد از متن، در جریان سند -->
+<div class="mt-5 w-full max-w-sm mx-auto">
+  <button
+    class="cta-btn w-full py-3.5 px-6 rounded-full text-[0.98rem] font-bold uppercase shadow-[0_8px_24px_rgba(255,46,146,0.16)]"
+    style="background-color:#ff2e92; color:#fff; cursor:pointer;"
+  >
+    START MY TRANSFORMATION
+  </button>
+</div>
+
+<style>
+/* basic transition + pointer already set inline */
+.cta-btn {
+  transition: transform 180ms cubic-bezier(.2,.9,.2,1), box-shadow 180ms ease, filter 180ms ease;
+  will-change: transform, box-shadow, filter;
+}
+
+/* hover: lift + stronger shadow + slight brighten */
+.cta-btn:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 18px 40px rgba(255,46,146,0.18);
+  filter: brightness(1.03);
+}
+
+/* active/tap: press down */
+.cta-btn:active {
+  transform: translateY(-2px) scale(0.995);
+  box-shadow: 0 8px 18px rgba(255,46,146,0.12);
+}
+
+/* focus visible for accessibility */
+.cta-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(255,20,147,0.18);
+  border: 2px solid rgba(255,255,255,0.06);
+}
+
+/* optional gentle entrance animation (use when element first appears) */
+@keyframes cta-entrance {
+  from { opacity: 0; transform: translateY(8px) scale(0.995); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.cta-btn.animate-in {
+  animation: cta-entrance 360ms cubic-bezier(.2,.9,.2,1) both;
+}
+
+/* mobile tweak: reduce translate on small screens */
+@media (max-width: 420px) {
+  .cta-btn:hover { transform: translateY(-4px) scale(1.02); }
+}
+</style>
       </div>
+
+      <!-- فضای نگه‌دارنده تا تصویر زیر محتوا قابل دید باشد ولی محتوا جابه‌جا نشود -->
+      <div class="mt-4" aria-hidden="true"></div>
     </div>
   </div>
 </section>
 
-</main>
+ </main>
 
     <footer class="bg-[#003C5D] text-gray-300 font-sans w-full">
   <div class="container mx-auto px-6 lg:px-8 py-16">
@@ -1625,39 +1917,83 @@
         </div>
       </div>
       
-      <div class="w-full lg:w-auto flex flex-wrap justify-between lg:justify-end gap-10 lg:gap-20">
-        
-        <div>
-          <h4 class="text-white font-bold tracking-wider">Kyto App</h4>
-          <ul class="mt-4 space-y-3">
-            <li><a href="#" class="hover:text-white transition-colors text-gray-400">Quiz</a></li>
-            <li><a href="#" class="hover:text-white transition-colors text-gray-400">App Features</a></li>
-            <li><a href="#" class="hover:text-white transition-colors text-gray-400">Training</a></li>
-            <li><a href="#" class="hover:text-white transition-colors text-gray-400">Nutrition</a></li>
-            <li><a href="#" class="hover:text-white transition-colors text-gray-400">About</a></li>
-          </ul>
-        </div>
-        
-        <div>
-          <h4 class="text-white font-bold tracking-wider">Articles</h4>
-          <ul class="mt-4 space-y-3">
-            <li><a href="#" class="hover:text-white transition-colors text-gray-400">Nibh</a></li>
-            <li><a href="#" class="hover:text-white transition-colors text-gray-400">Egestas</a></li>
-            <li><a href="#" class="hover:text-white transition-colors text-gray-400">Dictum</a></li>
-          </ul>
-        </div>
+<!-- ===== اضافه: دراپ‌داون‌های فوتر (قرار داده شود بلافاصله بعد از پایان .flex.flex-wrap ...) ===== -->
+<div class="w-full mt-6 lg:mt-0">
+  <div class="grid grid-cols-1 gap-4">
+    <!-- Kyto App -->
+    <div>
+      <button type="button"
+              class="w-full flex items-center justify-between text-white font-bold tracking-wider py-2"
+              aria-expanded="false" aria-controls="acc-kyto" data-acc-toggle>
+        <span>Kyto App</span>
+        <svg class="w-5 h-5 text-gray-400 transition-transform" viewBox="0 0 20 20" fill="none" stroke="currentColor">
+          <path d="M6 8l4 4 4-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <ul id="acc-kyto" class="mt-2 space-y-2 text-gray-400 hidden pl-3">
+        <li><a href="#" class="block hover:text-white">Quiz</a></li>
+        <li><a href="#" class="block hover:text-white">App Features</a></li>
+        <li><a href="#" class="block hover:text-white">Training</a></li>
+        <li><a href="#" class="block hover:text-white">Nutrition</a></li>
+        <li><a href="#" class="block hover:text-white">About</a></li>
+      </ul>
+    </div>
 
-        <div>
-          <h4 class="text-white font-bold tracking-wider">Support</h4>
-          <ul class="mt-4 space-y-3">
-            <li><a href="#" class="hover:text-white transition-colors text-gray-400">Contact</a></li>
-            <li><a href="#" class="hover:text-white transition-colors text-gray-400">Terms of Use</a></li>
-            <li><a href="#" class="hover:text-white transition-colors text-gray-400">Privacy Notice</a></li>
-            <li><a href="#" class="hover:text-white transition-colors text-gray-400">Cookie Policy</a></li>
-          </ul>
-        </div>
+    <!-- Articles -->
+    <div>
+      <button type="button"
+              class="w-full flex items-center justify-between text-white font-bold tracking-wider py-2"
+              aria-expanded="false" aria-controls="acc-articles" data-acc-toggle>
+        <span>Articles</span>
+        <svg class="w-5 h-5 text-gray-400 transition-transform" viewBox="0 0 20 20" fill="none" stroke="currentColor">
+          <path d="M6 8l4 4 4-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <ul id="acc-articles" class="mt-2 space-y-2 text-gray-400 hidden pl-3">
+        <li><a href="#" class="block hover:text-white">Nibh</a></li>
+        <li><a href="#" class="block hover:text-white">Egestas</a></li>
+        <li><a href="#" class="block hover:text-white">Dictum</a></li>
+      </ul>
+    </div>
+<script>
+  (function(){
+    const toggles = document.querySelectorAll('[data-acc-toggle]');
+    toggles.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.getAttribute('aria-controls');
+        const panel = document.getElementById(targetId);
+        const expanded = btn.getAttribute('aria-expanded') === 'true';
+        btn.setAttribute('aria-expanded', String(!expanded));
+        if (panel) panel.classList.toggle('hidden');
 
-      </div>
+        // rotate icon
+        const svg = btn.querySelector('svg');
+        if (svg) svg.classList.toggle('rotate-180');
+      });
+    });
+  })();
+</script>
+
+    <!-- Support -->
+    <div>
+      <button type="button"
+              class="w-full flex items-center justify-between text-white font-bold tracking-wider py-2"
+              aria-expanded="false" aria-controls="acc-support" data-acc-toggle>
+        <span>Support</span>
+        <svg class="w-5 h-5 text-gray-400 transition-transform" viewBox="0 0 20 20" fill="none" stroke="currentColor">
+          <path d="M6 8l4 4 4-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <ul id="acc-support" class="mt-2 space-y-2 text-gray-400 hidden pl-3">
+        <li><a href="#" class="block hover:text-white">Contact</a></li>
+        <li><a href="#" class="block hover:text-white">Terms of Use</a></li>
+        <li><a href="#" class="block hover:text-white">Privacy Notice</a></li>
+        <li><a href="#" class="block hover:text-white">Cookie Policy</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+<!-- ===== end dropdowns ===== -->
     </div>
     <div class="mt-16 pt-8 border-t border-gray-700/50 flex flex-col sm:flex-row justify-between items-center">
       <p class="text-gray-500 text-sm">© Copyright 2025</p>
